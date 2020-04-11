@@ -1,10 +1,11 @@
 # Multi-Cloud Explorer - Django App
 
-[![Build Status](https://travis-ci.org/srault95/mce-django-app.svg)](https://travis-ci.org/srault95/mce-django-app)
-[![Coverage Status](https://coveralls.io/repos/srault95/mce-django-app/badge.svg?branch=master&service=github)](https://coveralls.io/github/srault95/mce-django-app?branch=master)
-[![Code Health](https://landscape.io/github/srault95/mce-django-app/master/landscape.svg?style=flat)](https://landscape.io/github/srault95/mce-django-app/master)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Build Status](https://travis-ci.org/multi-cloud-explorer/mce-django-app.svg)](https://travis-ci.org/multi-cloud-explorer/mce-django-app)
+[![Coverage Status](https://coveralls.io/repos/multi-cloud-explorer/mce-django-app/badge.svg?branch=master&service=github)](https://coveralls.io/github/multi-cloud-explorer/mce-django-app?branch=master)
+[![Code Health](https://landscape.io/github/multi-cloud-explorer/mce-django-app/master/landscape.svg?style=flat)](https://landscape.io/github/multi-cloud-explorer/mce-django-app/master)
 
-[Documentation](https://mce-django-server.readthedocs.org)
+[Documentation](https://multi-cloud-explorer.readthedocs.org)
 
 ## Providers implémentés
 
@@ -15,5 +16,5 @@
 
 ## Intégre les packages
 
-- [mce-lib-azure](https://github.com/srault95/mce-lib-azure.git)
+- [mce-lib-azure](https://github.com/multi-cloud-explorer/mce-lib-azure.git)
 
