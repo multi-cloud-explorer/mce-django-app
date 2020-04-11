@@ -22,7 +22,7 @@ before_install:
     fi
 
 install:
-  - pip install -e .[tests]
+  - pip install -e .[tests,dev]
   - pip install coveralls
 
 script:

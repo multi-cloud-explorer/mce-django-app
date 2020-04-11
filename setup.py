@@ -20,11 +20,12 @@ tests_requires = [
     'pytest-instafail',
     'curlify',
     'factory-boy',
-    'bandit',         # python security audit
+    'bandit',
     'flake8',
     'coverage',
     'responses',
     'freezegun',
+    'django-environ',
 ]
 
 dev_requires = [
@@ -32,6 +33,7 @@ dev_requires = [
     'ipython',
     'autopep8',
     'black',
+    'wheel',
 ]
 
 extras_requires = {
