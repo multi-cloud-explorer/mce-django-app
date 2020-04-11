@@ -1,0 +1,38 @@
+language: python
+
+sudo: true
+
+dist: xenial
+
+python:
+ - "3.7"
+ - "3.8"
+
+services:
+ - redis-server
+ - postgresql
+
+addons:
+  postgresql: "12"
+
+install:
+ - pip install -e .[tests]
+ - pip install coveralls
+
+before_script:
+  - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
+  - psql -c 'create database mce_test;' -U postgres
+
+script:
+  - black -S -t py37 --exclude \.migration --check mce_django_app/
+  - pytest --cov=mce_django_app/ --cov-branch
+
+after_script:
+  - coveralls
+
+env:
+ - DATABASE_URL="postgres://travis:travis@localhost/mce_test"
+ - DJANGO_SETTINGS_MODULE=tests.app_test.settings
+ - MCE_LOG_LEVEL=ERROR
+ #- CACHE_URL=redis://127.0.0.1:6379/1
+
