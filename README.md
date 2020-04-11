@@ -14,7 +14,29 @@
 - [ ] GCP
 - [ ] VMware
 
-## Intégre les packages
+## Integrate in your Django Project
 
-- [mce-lib-azure](https://github.com/multi-cloud-explorer/mce-lib-azure.git)
+**Add to settings.py:**
+
+```python
+INSTALLED_APPS = [
+    ...,
+    'mce_django_app',
+]
+```
+
+**Update database:**
+
+```bash
+./manage.py migrate
+```
+
+## Run Tests
+
+```bash
+
+pip install -e .[tests]
+
+DATABASE_URL=postgres://mce:password@127.0.0.1:5432/mce pytest
+```
 

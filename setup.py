@@ -1,4 +1,7 @@
+import os
 from setuptools import setup, find_packages
+
+here = os.path.abspath(os.path.dirname(__file__))
 
 install_requires = [
     'Django>=3.0',
@@ -31,22 +34,20 @@ dev_requires = [
     'black',
 ]
 
-doc_requires = [
-    'Sphinx',
-    'sphinx_rtd_theme',
-    'sphinx-click',
-]
-
 extras_requires = {
     'tests': tests_requires,
     'dev': dev_requires,
-    'doc': doc_requires,
 }
+
+with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 setup(
     name='mce-django-app',
     version="0.1.0",
     description='Django App for Multi Cloud Explorer',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/multi-cloud-explorer/mce-django-app.git',
     license='GPLv3+',
     packages=find_packages(),

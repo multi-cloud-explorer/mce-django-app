@@ -6,7 +6,6 @@ dist: xenial
 
 python:
  - "3.7"
- - "3.8"
 
 services:
  - redis-server
@@ -15,6 +14,11 @@ services:
 addons:
   postgresql: "12"
 
+env:
+ - DATABASE_URL="postgres://travis:travis@localhost/mce_test"
+ - DJANGO_SETTINGS_MODULE=tests.app_test.settings
+ - MCE_LOG_LEVEL=ERROR
+
 install:
  - pip install -e .[tests]
  - pip install coveralls
@@ -22,17 +26,12 @@ install:
 before_script:
   - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
   - psql -c 'create database mce_test;' -U postgres
+  - psql -c 'GRANT ALL PRIVILEGES ON DATABASE mce TO travis';
 
 script:
-  - black -S -t py37 --exclude \.migration --check mce_django_app/
-  - pytest --cov=mce_django_app/ --cov-branch
+  - black -S -t py37 --exclude \.migrations --check mce_django_app
+  - pytest
 
 after_script:
   - coveralls
-
-env:
- - DATABASE_URL="postgres://travis:travis@localhost/mce_test"
- - DJANGO_SETTINGS_MODULE=tests.app_test.settings
- - MCE_LOG_LEVEL=ERROR
- #- CACHE_URL=redis://127.0.0.1:6379/1
 
