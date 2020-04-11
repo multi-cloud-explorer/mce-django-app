@@ -26,6 +26,9 @@ tests_requires = [
     'responses',
     'freezegun',
     'django-environ',
+    'django-filter',
+    'django-select2',
+    'jsonpatch'
 ]
 
 dev_requires = [
