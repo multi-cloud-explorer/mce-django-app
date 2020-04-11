@@ -1,32 +1,29 @@
+os: linux
+dist: xenial
 language: python
 
-sudo: true
-
-dist: xenial
-
 python:
- - "3.7"
+  - "3.7"
 
 services:
- - redis-server
- - postgresql
+  - docker
 
-addons:
-  postgresql: "12"
+jobs:
+  include:
+    - name: "Python 3.7 on Linux Ubuntu"
+      python: 3.7
+      env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=psql DATABASE_URL=postgres://travis:travis@localhost/mcetest
 
-env:
- - DATABASE_URL="postgres://travis:travis@localhost/mce_test"
- - DJANGO_SETTINGS_MODULE=tests.app_test.settings
- - MCE_LOG_LEVEL=ERROR
+before_install:
+  - python -m pip install --upgrade pip
+  - if [[ $TEST_DB_ENGINE == psql ]]; then
+       docker run -d -p 5432:5432 -e POSTGRES_DB=travis -e POSTGRES_USER=travis -e POSTGRES_PASSWORD=travis -e POSTGRES_DB=mcetest postgres:12-alpine;
+       pip install psycopg2-binary;
+    fi
 
 install:
- - pip install -e .[tests]
- - pip install coveralls
-
-before_script:
-  - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
-  - psql -c 'create database mce_test;' -U postgres
-  - psql -c 'GRANT ALL PRIVILEGES ON DATABASE mce TO travis';
+  - pip install -e .[tests]
+  - pip install coveralls
 
 script:
   - black -S -t py37 --exclude \.migrations --check mce_django_app
