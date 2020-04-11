@@ -129,19 +129,24 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'debug' # TODO: debug if debug: ? simple https://docs.djangoproject.com/fr/2.2/topics/logging/
+            'formatter': 'debug'
+        },
+        'db_log': {
+            'class': 'mce_django_app.db_log_handler.DatabaseLogHandler'
         },
     },
     'loggers': {
         '': {
-            'handlers': ['console'],
+            'handlers': ['console', 'db_log'],
             'level': env('MCE_LOG_LEVEL', default='DEBUG'),
             'propagate': False,
         },
         'urllib3': {'level': 'ERROR'},
-        'smbprotocol': {'level': 'WARN'},
         'chardet': {'level': 'WARN'},
         'cchardet': {'level': 'WARN'},
     },
 }
+
+DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE = 10
+DJANGO_DB_LOGGER_ENABLE_FORMATTER = False
 
