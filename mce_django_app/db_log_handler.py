@@ -1,23 +1,20 @@
 import logging
 
-# from django.conf import settings
-
-# from mce_django_app.models.logs import StatusLog
-
 db_default_formatter = logging.Formatter()
-
-# DJANGO_DB_LOGGER_ENABLE_FORMATTER = getattr(settings, 'DJANGO_DB_LOGGER_ENABLE_FORMATTER', False)
 
 
 class DatabaseLogHandler(logging.Handler):
 
     # TODO: gevent pool
     def emit(self, record):
-        from mce_django_app.models.logs import StatusLog
 
-        DJANGO_DB_LOGGER_ENABLE_FORMATTER = getattr(
-            settings, 'DJANGO_DB_LOGGER_ENABLE_FORMATTER', False
-        )
+        from mce_django_app.models.logs import StatusLog
+        #from django.conf import settings
+
+        #DJANGO_DB_LOGGER_ENABLE_FORMATTER = getattr(
+        #    settings, 'DJANGO_DB_LOGGER_ENABLE_FORMATTER', False
+        #)
+        DJANGO_DB_LOGGER_ENABLE_FORMATTER = False
 
         trace = None
 
