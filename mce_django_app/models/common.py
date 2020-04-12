@@ -17,7 +17,8 @@ __all__ = [
     'BaseModel',
     'GenericAccount',
     'Tag',
-    'ResourceType' 'Resource',
+    'ResourceType',
+    'Resource',
     'ResourceEventChange',
 ]
 
