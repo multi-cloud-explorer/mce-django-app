@@ -131,13 +131,13 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'debug'
         },
-        'db_log': {
-            'class': 'mce_django_app.db_log_handler.DatabaseLogHandler'
-        },
+        #'db_log': {
+        #    'class': 'mce_django_app.db_log_handler.DatabaseLogHandler'
+        #},
     },
     'loggers': {
         '': {
-            'handlers': ['console', 'db_log'],
+            'handlers': ['console'], #'db_log'],
             'level': env('MCE_LOG_LEVEL', default='DEBUG'),
             'propagate': False,
         },
