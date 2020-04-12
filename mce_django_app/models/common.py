@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
 from model_utils.models import SoftDeletableModel
+from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 from django_cryptography.fields import encrypt
 
 from mce_django_app import utils
@@ -24,6 +25,19 @@ __all__ = [
 
 # TODO: order_by default and others Metas
 
+class CustomSoftDeletableQuerySet(SoftDeletableQuerySet):
+    
+    def delete(self):
+        """
+        Soft delete objects from queryset (set their ``is_removed``
+        field to True)
+        """
+        return self.update(is_removed=True)
+
+class CustomSoftDeletableManager(SoftDeletableManager):
+
+    _queryset_class = CustomSoftDeletableQuerySet
+
 # TODO: permissions ? owner/owner_group ?
 class BaseModel(SoftDeletableModel):
     """Base for all MCE models
@@ -32,6 +46,8 @@ class BaseModel(SoftDeletableModel):
     
     Use Model.all_objects for all datas
     """
+
+    objects = CustomSoftDeletableManager()
 
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
@@ -190,6 +206,7 @@ class Resource(BaseModel):
     def to_dict(self, fields=None, exclude=[]):
         exclude = exclude or []
         exclude.append("changes")
+        exclude.append("resource_ptr")
 
         data = super().to_dict(fields=fields, exclude=exclude)
         data['resource_type'] = self.resource_type.name
@@ -197,6 +214,6 @@ class Resource(BaseModel):
         if self.metas:
             data['metas'] = dict(self.metas)
 
-        data["tags"] = [tag.to_dict() for tag in self.tags.all()]
+        data["tags"] = [tag.to_dict(exclude=exclude) for tag in self.tags.all()]
 
         return data
