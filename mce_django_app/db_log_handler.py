@@ -9,11 +9,12 @@ class DatabaseLogHandler(logging.Handler):
     def emit(self, record):
 
         from mce_django_app.models.logs import StatusLog
-        #from django.conf import settings
 
-        #DJANGO_DB_LOGGER_ENABLE_FORMATTER = getattr(
+        # from django.conf import settings
+
+        # DJANGO_DB_LOGGER_ENABLE_FORMATTER = getattr(
         #    settings, 'DJANGO_DB_LOGGER_ENABLE_FORMATTER', False
-        #)
+        # )
         DJANGO_DB_LOGGER_ENABLE_FORMATTER = False
 
         trace = None

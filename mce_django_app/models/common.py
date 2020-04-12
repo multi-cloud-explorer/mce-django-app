@@ -25,8 +25,8 @@ __all__ = [
 
 # TODO: order_by default and others Metas
 
+
 class CustomSoftDeletableQuerySet(SoftDeletableQuerySet):
-    
     def delete(self):
         """
         Soft delete objects from queryset (set their ``is_removed``
@@ -34,9 +34,11 @@ class CustomSoftDeletableQuerySet(SoftDeletableQuerySet):
         """
         return self.update(is_removed=True)
 
+
 class CustomSoftDeletableManager(SoftDeletableManager):
 
     _queryset_class = CustomSoftDeletableQuerySet
+
 
 # TODO: permissions ? owner/owner_group ?
 class BaseModel(SoftDeletableModel):

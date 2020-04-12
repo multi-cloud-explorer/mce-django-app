@@ -1,9 +1,17 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+# from django.db.models.signals import post_save, post_delete, pre_save
+# from django.dispatch import receiver
+
 from mce_django_app import utils
 from mce_django_app import constants
-from mce_django_app.models.common import BaseModel, Resource, GenericAccount
+from mce_django_app.models.common import (
+    BaseModel,
+    Resource,
+    GenericAccount,
+    ResourceEventChange,
+)
 
 # TODO: Azure Account avec tenant optionnel
 
@@ -96,3 +104,17 @@ class ResourceAzure(Resource):
         if self.sku:
             data['sku'] = dict(self.sku)
         return data
+
+
+"""
+@receiver(post_save, sender=ResourceGroupAzure)
+def create_or_update_resource_group(sender, instance=None, created=None, **kwargs):
+    if created:
+        ResourceEventChange.objects.create(
+            action=constants.EventChangeType.CREATE,
+            content_object=instance,
+            new_object=instance.to_dict(exclude=['created', 'updated']),
+        )
+
+# post_delete: faux delete si soft delete !!!
+"""
