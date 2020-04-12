@@ -11,6 +11,7 @@ install_requires = [
 ]
 
 tests_requires = [
+    'psycopg2-binary',
     'pytest',
     'pytest-cov',
     'pytest-pep8',
