@@ -39,3 +39,19 @@ def test_resource_group_azure_success(subscription, tags):
     assert resource.created is not None
 
     assert resource.updated is None
+
+@pytest.mark.skip("TODO")
+def test_resource_group_azure_error_duplicate():
+    """check error if resource_group_azure exist"""
+
+@pytest.mark.skip("TODO")
+def test_resource_group_azure_error_max_length():
+    """Test max_length on name and description"""
+
+@pytest.mark.skip("TODO")
+def test_resource_group_azure_error_null_and_blank_value():
+    """test null and blank value"""
+
+@pytest.mark.skip("TODO")
+def test_resource_group_azure_on_delete():
+    """test delete propagation"""

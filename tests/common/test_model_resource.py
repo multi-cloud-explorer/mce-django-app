@@ -64,7 +64,7 @@ def test_resource_error_duplicate(resource_type, tags):
         'id': ['Resource with this Id already exists.']
     }
 
-def test_resource_error_with_null_or_blank(resource_type):
+def test_resource_error_null_and_blank_value(resource_type):
     """test error for null or blank values"""
 
     with pytest.raises(ValidationError) as excinfo:
@@ -109,3 +109,6 @@ def test_resource_error_max_length(resource_type):
         'name': ['Ensure this value has at most 255 characters (it has 256).'], 
     }
 
+@pytest.mark.skip("TODO")
+def test_resource_on_delete():
+    """test delete propagation"""

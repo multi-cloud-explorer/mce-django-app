@@ -80,25 +80,6 @@ def test_resource_azure_error_with_null_or_blank(subscription, resource_group, r
         'location': ['This field cannot be blank.'], 
     }
 
-"""
-    kind = models.CharField(
-                            max_length=255,
-                            null=True, blank=True)
-
-    location = models.CharField(
-                            max_length=255)
-        
-    subscription = models.ForeignKey(
-                            Subscription,
-                            on_delete=models.PROTECT)
-
-    resource_group = models.ForeignKey(
-                            ResourceGroupAzure, 
-                            on_delete=models.PROTECT)
-
-    sku = utils.JSONField(
-                            default={}, 
-                            null=True, blank=True)
-
-"""    
-
+@pytest.mark.skip("TODO")
+def test_resource_azure_on_delete():
+    """test delete propagation"""

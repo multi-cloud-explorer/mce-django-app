@@ -81,3 +81,6 @@ def test_resource_type_error_provider_choice():
         'provider': ["Value 'BADCHOICE' is not a valid choice."]
     }
 
+@pytest.mark.skip("TODO")
+def test_resource_type_on_delete():
+    """test delete propagation"""

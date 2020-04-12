@@ -94,3 +94,7 @@ def test_resource_event_change_create_and_delete(resource):
     )
 
     assert resource.changes.count() == 2
+
+@pytest.mark.skip("TODO")
+def test_resource_event_change_on_delete():
+    """test delete propagation"""

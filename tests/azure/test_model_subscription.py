@@ -41,3 +41,19 @@ def test_subscription_azure(generic_account):
         password=generic_account.password,
         is_china=False
     )
+
+@pytest.mark.skip("TODO")
+def test_subscription_error_duplicate():
+    """check error if subscription exist"""
+
+@pytest.mark.skip("TODO")
+def test_subscription_error_max_length():
+    """Test max_length on name and description"""
+
+@pytest.mark.skip("TODO")
+def test_subscription_error_null_and_blank_value():
+    """test null and blank value"""
+
+@pytest.mark.skip("TODO")
+def test_subscription_on_delete():
+    """test delete propagation"""

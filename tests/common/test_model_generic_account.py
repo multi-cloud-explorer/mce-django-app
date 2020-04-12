@@ -8,8 +8,7 @@ pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 from mce_django_app import constants
 from mce_django_app.models import common as models
 
-def test_generic_account():
-    assert False, "NotImplemented"
+def test_generic_account_success():
     
     # create simple account
     account = models.GenericAccount.objects.create(
@@ -19,6 +18,18 @@ def test_generic_account():
         password="password"
     )
 
-    # TODO: check error if no password or no username
-    # TODO: check limit fields length
-    # TODO: check unique name
+@pytest.mark.skip("TODO")
+def test_generic_account_error_duplicate():
+    """check error if generic_account exist"""
+
+@pytest.mark.skip("TODO")
+def test_generic_account_error_max_length():
+    """Test max_length on name and description"""
+
+@pytest.mark.skip("TODO")
+def test_generic_account_error_null_and_blank_value():
+    """test null and blank value"""
+
+@pytest.mark.skip("TODO")
+def test_generic_account_on_delete():
+    """test delete propagation"""

@@ -107,3 +107,6 @@ def test_tag_error_provider_choice():
         'provider': ["Value 'BADCHOICE' is not a valid choice."]
     }
 
+@pytest.mark.skip("TODO")
+def test_tag_on_delete():
+    """test delete propagation"""
