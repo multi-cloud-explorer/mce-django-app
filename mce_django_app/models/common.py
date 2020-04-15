@@ -102,12 +102,16 @@ class ResourceEventChange(BaseModel):
         'content_type', 'object_id', for_concrete_model=False
     )
 
+    # TODO: state: new|sended|consumed
+
     def __str__(self):
-        return self.content_type
+        return f"{self.content_type.app_label}.{self.content_type.model}: {self.object_id}"
 
 
 class GenericAccount(BaseModel):
     """Store Login/Password"""
+
+    # TODO: settings pour auth et forms spécifique
 
     name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
 
@@ -126,6 +130,7 @@ class GenericAccount(BaseModel):
 
 
 class Tag(BaseModel):
+    """Cloud Tags"""
 
     name = models.CharField(max_length=255, verbose_name=_("Name"))
 
@@ -148,7 +153,7 @@ class Tag(BaseModel):
         ]
 
     def __str__(self):
-        return self.name  # f"{self.provider} - {self.name}"
+        return self.name
 
 
 class ResourceType(BaseModel):
