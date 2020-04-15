@@ -8,6 +8,10 @@ install_requires = [
     'django-extensions',
     'django-cryptography',
     'django-model-utils',
+    'django-tables2',
+
+    'django-dynamic-fixture', # for mce_django_app.pytest.plugin
+    'pytest',                 # for mce_django_app.pytest.plugin
 ]
 
 tests_requires = [
@@ -26,9 +30,19 @@ tests_requires = [
     'coverage',
     'responses',
     'freezegun',
+
     'django-environ',
     'django-filter',
     'django-select2',
+    'django-crispy-forms',
+
+    'djangorestframework',
+    'django-cors-headers',
+    'djoser',
+    'drf-yasg',
+
+    'django-allauth',
+
     'jsonpatch'
 ]
 
@@ -56,8 +70,8 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/multi-cloud-explorer/mce-django-app.git',
     license='GPLv3+',
-    packages=find_packages(),
-    include_package_data=True, 
+    packages=find_packages(exclude=("tests",)),
+    include_package_data=False, 
     tests_require=tests_requires,
     install_requires=install_requires,
     extras_require=extras_requires,
@@ -73,4 +87,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
     ],
+    #entry_points = {
+    #    "pytest11": ["mce_django_app = mce_django_app.pytest.plugin"]
+    #},
 )

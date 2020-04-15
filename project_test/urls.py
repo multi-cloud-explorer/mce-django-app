@@ -15,5 +15,8 @@ urlpatterns = [
     path('adminmce/', admin.site.urls),
     path('select2/', include('django_select2.urls')),
     re_path(r'^%s(?P<path>.*)$' % re.escape(settings.STATIC_URL.lstrip('/')), _serve),
+    path('', include(('mce_django_app.urls', 'mce-django-app'))),
+    path('accounts/', include('allauth.urls')),
+    path('mce-api/v1/', include('mce_django_app.api.urls')),
 ]
 
