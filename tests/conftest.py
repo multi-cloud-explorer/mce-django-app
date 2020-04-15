@@ -1,5 +1,7 @@
 import pytest
 
+pytest_plugins = "mce_django_app.pytest.plugin"
+
 class MockResponse:
     """
     from unittest.mock import patch
