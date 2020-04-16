@@ -9,7 +9,10 @@ from mce_django_app.models import azure as models
 pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
 @freeze_time("2019-01-01")
-def test_resource_group_azure_success(subscription, tags):
+def test_resource_group_azure_success(
+    mce_app_azure_subscription, 
+    mce_app_company,
+    mce_app_tags_five):
 
     resource_type = ResourceType.objects.create(
         name="Microsoft.Resources/resourceGroups",
@@ -17,17 +20,18 @@ def test_resource_group_azure_success(subscription, tags):
     )
     
     name = "rg1"
-    resource_id = f"/subscriptions/{subscription.pk}/resourceGroups/{name}/providers/{resource_type.name}/{name}"
+    resource_id = f"/subscriptions/{mce_app_azure_subscription.subscription_id}/resourceGroups/{name}/providers/{resource_type.name}/{name}"
     
     resource = models.ResourceGroupAzure.objects.create(
-        id=resource_id,
+        resource_id=resource_id,
         name=name,
+        company=mce_app_company,
         resource_type=resource_type,
-        subscription=subscription,
+        subscription=mce_app_azure_subscription,
         provider=constants.Provider.AZURE,
         location="francecentral",
     )
-    resource.tags.set(tags)
+    resource.tags.set(mce_app_tags_five)
 
     assert resource.active is True
     assert resource.tags.count() == 5

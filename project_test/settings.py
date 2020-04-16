@@ -1,5 +1,8 @@
 import os
+import tempfile
+
 import environ
+from django.utils.translation import gettext_lazy as _
 
 env = environ.Env(DEBUG=(bool, False))
 
@@ -63,15 +66,27 @@ ROOT_URLCONF = 'project_test.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        #'DIRS': [
+        #     os.path.join(BASE_DIR, 'templates'),
+        #],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
             ],
+            #'loaders': [
+            #    ('django.template.loaders.cached.Loader', [
+            #        'django.template.loaders.filesystem.Loader',
+            #        'django.template.loaders.app_directories.Loader',
+            #    ])
+            #],
         },
     },
 ]
@@ -86,11 +101,14 @@ CACHES = {
 }
 
 DATABASES = {
-    'default': env.db(),
+    'default': env.db(default='sqlite:////tmp/mce-django-app-test-sqlite.db'),
 }
 
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'
+AUTH_USER_MODEL = 'mce_django_app.User'
+
+LOGIN_URL = 'admin:login'
+#LOGIN_URL = '/accounts/login/'
+#LOGIN_REDIRECT_URL = '/'
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
@@ -115,7 +133,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LOCALE_PATHS = ( os.path.join(BASE_DIR, 'locale'), )
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGES = [
+  ('fr', _('Français')),
+  ('en', _('Anglais')),
+]
+
+LANGUAGE_CODE = 'fr'
 
 TIME_ZONE = 'UTC'
 
@@ -128,6 +151,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+MEDIA_ROOT = tempfile.gettempdir()
 
 SITE_ID = env('MCE_SITE_ID', default=1, cast=int)
 
@@ -167,6 +192,9 @@ LOGGING = {
     },
 }
 
+
+TEST_RUNNER = 'project_test.runner.PytestTestRunner'
+
 DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE = 10
 DJANGO_DB_LOGGER_ENABLE_FORMATTER = False
 
@@ -188,7 +216,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 20,
+    'PAGE_SIZE': 25,
     'ORDERING_PARAM': 'sort',
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'TEST_REQUEST_RENDERER_CLASSES': [

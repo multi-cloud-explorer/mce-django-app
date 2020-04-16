@@ -8,7 +8,9 @@ install_requires = [
     'django-extensions',
     'django-cryptography',
     'django-model-utils',
-    'django-tables2',
+    'django-guardian',
+    'python-slugify',
+    'djangorestframework',
 
     'django-dynamic-fixture', # for mce_django_app.pytest.plugin
     'pytest',                 # for mce_django_app.pytest.plugin
@@ -36,7 +38,6 @@ tests_requires = [
     'django-select2',
     'django-crispy-forms',
 
-    'djangorestframework',
     'django-cors-headers',
     'djoser',
     'drf-yasg',

@@ -7,27 +7,14 @@ pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
 from mce_django_app import utils
 
-# TODO: ModelToDictMixin
-# TODO: ValidateModelMixin
-# TODO: last_error
+# TODO: test JSONField
 
-"""
-A mettre dans une app local avec INSTALLED_APPS
-class TestJsonModel(models.Model):
+def test_slugify_resource_id_function():
 
-    metas = utils.JSONField(
-                            default={}, 
-                            null=True, blank=True)
+    resource_id = "/subscriptions/1e1c9a88-cc4c-41a0-9176-1af8e593a609/resourceGroups/rg1/providers/Microsoft.ClassicCompute/virtualMachines/vm1"
+    
+    result = utils.slugify_resource_id_function(resource_id)
+    
+    assert result == "subscriptions-1e1c9a88-cc4c-41a0-9176-1af8e593a609-resourcegroups-rg1-providers-microsoft-classiccompute-virtualmachines-vm1"
 
-"""
-
-@pytest.mark.skip("TODO")
-def test_json_field():
-    """JSONField Tests"""
-
-    obj = TestJsonModel(metas={"a": "x"})
-    assert obj.metas == {"a": "x"}
-    obj.full_clean()
-
-    # TODO: invalid JSON
-
+    assert utils.slugify_resource_id_function("x1") == "x1"

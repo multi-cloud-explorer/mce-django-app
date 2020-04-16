@@ -2,6 +2,15 @@ import pytest
 
 pytest_plugins = "mce_django_app.pytest.plugin"
 
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    pass
+
+@pytest.fixture(autouse=True)
+def set_default_lang(settings):
+    settings.LANGUAGE_CODE = 'en'
+    settings.REST_FRAMEWORK['PAGE_SIZE'] = 5
+
 class MockResponse:
     """
     from unittest.mock import patch

@@ -1,0 +1,75 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-04-16 07:45+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mce_django_app/admin/azure.py:13
+msgid "Subscription"
+msgstr ""
+
+#: mce_django_app/admin/azure.py:19
+msgid "Tenant"
+msgstr ""
+
+#: mce_django_app/admin/azure.py:25
+msgid "Resource Group"
+msgstr ""
+
+#: mce_django_app/admin/common.py:13
+msgid "Resource Type"
+msgstr ""
+
+#: mce_django_app/models/common.py:116 mce_django_app/models/common.py:135
+msgid "Name"
+msgstr ""
+
+#: mce_django_app/models/common.py:119
+msgid "Description"
+msgstr ""
+
+#: mce_django_app/models/common.py:122
+msgid "Username or Client ID"
+msgstr ""
+
+#: mce_django_app/models/common.py:125
+msgid "Password or Secret Key"
+msgstr ""
+
+#: mce_django_app/models/logs.py:6
+msgid "NotSet"
+msgstr ""
+
+#: mce_django_app/models/logs.py:7
+msgid "Info"
+msgstr ""
+
+#: mce_django_app/models/logs.py:8
+msgid "Warning"
+msgstr ""
+
+#: mce_django_app/models/logs.py:9
+msgid "Debug"
+msgstr ""
+
+#: mce_django_app/models/logs.py:10
+msgid "Error"
+msgstr ""
+
+#: mce_django_app/models/logs.py:11
+msgid "Fatal"
+msgstr ""

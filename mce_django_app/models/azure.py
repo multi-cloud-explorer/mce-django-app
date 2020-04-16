@@ -1,8 +1,8 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-# from django.db.models.signals import post_save, post_delete, pre_save
-# from django.dispatch import receiver
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 
 from mce_django_app import utils
 from mce_django_app import constants
@@ -11,6 +11,7 @@ from mce_django_app.models.common import (
     Resource,
     GenericAccount,
     ResourceEventChange,
+    Company,
 )
 
 # TODO: Azure Account avec tenant optionnel
@@ -19,11 +20,13 @@ from mce_django_app.models.common import (
 class Subscription(BaseModel):
     """Cloud Subscription Model"""
 
-    id = models.UUIDField(primary_key=True, max_length=255)
+    subscription_id = models.CharField(unique=True, max_length=255)
 
     name = models.CharField(max_length=255)
 
-    tenant = models.UUIDField(max_length=255)
+    tenant = models.CharField(max_length=255)
+
+    company = models.ForeignKey(Company, on_delete=models.PROTECT)
 
     location = models.CharField(max_length=255)
 
@@ -53,8 +56,8 @@ class Subscription(BaseModel):
         """Auth format for `mce_azure.utils.get_access_token`"""
 
         data = dict(
-            subscription_id=str(self.pk),
-            tenant=str(self.tenant),
+            subscription_id=self.subscription_id,
+            tenant=self.tenant,
             user=None,
             password=None,
             is_china=self.is_china,
@@ -64,10 +67,10 @@ class Subscription(BaseModel):
             data["password"] = self.account.password
         return data
 
-    def to_dict(self, fields=None, exclude=None):
-        data = super().to_dict(fields=fields, exclude=exclude)
-        data['id'] = str(self.pk)
-        return data
+    #def to_dict(self, fields=None, exclude=None):
+    #    data = super().to_dict(fields=fields, exclude=exclude)
+    #    data['id'] = str(self.pk)
+    #    return data
 
 
 class ResourceGroupAzure(Resource):
@@ -78,7 +81,7 @@ class ResourceGroupAzure(Resource):
 
     def to_dict(self, fields=None, exclude=None):
         data = super().to_dict(fields=fields, exclude=exclude)
-        data['subscription'] = str(self.subscription.pk)
+        data['subscription'] = self.subscription.subscription_id
         return data
 
 
@@ -99,16 +102,14 @@ class ResourceAzure(Resource):
 
     def to_dict(self, fields=None, exclude=None):
         data = super().to_dict(fields=fields, exclude=exclude)
-        data['subscription'] = str(self.subscription.pk)
+        data['subscription'] = self.subscription.subscription_id
         data['resource_group'] = self.resource_group.name
         if self.sku:
             data['sku'] = dict(self.sku)
         return data
 
 
-"""
-@receiver(post_save, sender=ResourceGroupAzure)
-def create_or_update_resource_group(sender, instance=None, created=None, **kwargs):
+def _create_event_change(sender, instance=None, created=None, **kwargs):
     if created:
         ResourceEventChange.objects.create(
             action=constants.EventChangeType.CREATE,
@@ -116,5 +117,13 @@ def create_or_update_resource_group(sender, instance=None, created=None, **kwarg
             new_object=instance.to_dict(exclude=['created', 'updated']),
         )
 
+@receiver(post_save, sender=ResourceAzure)
+def resource_create_event_change(sender, instance=None, created=None, **kwargs):
+    _create_event_change(sender, instance=instance, created=created, **kwargs)
+
+@receiver(post_save, sender=ResourceGroupAzure)
+def resource_group_create_event_change(sender, instance=None, created=None, **kwargs):
+    _create_event_change(sender, instance=instance, created=created, **kwargs)
+
 # post_delete: faux delete si soft delete !!!
-"""
+

@@ -7,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
+from django_extensions.db.fields import AutoSlugField
 from model_utils.models import SoftDeletableModel
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 from django_cryptography.fields import encrypt
@@ -81,6 +82,12 @@ class BaseModel(SoftDeletableModel):
     class Meta:
         abstract = True
 
+
+class Company(BaseModel):
+
+    name = models.CharField(max_length=255)
+
+    slug = AutoSlugField(populate_from=['name'], overwrite=True, unique=True, blank=False)
 
 class ResourceEventChange(BaseModel):
 
@@ -158,7 +165,6 @@ class Tag(BaseModel):
 
 class ResourceType(BaseModel):
 
-    # TODO: primary_key ???
     name = models.CharField(max_length=255, unique=True)
 
     description = models.CharField(max_length=255, null=True, blank=True)
@@ -186,8 +192,19 @@ class Resource(BaseModel):
     geo localisation ?
     """
 
+    """
+    def slugify_function(self, content):
+        v = utils.slugify_resource_id_function(content)
+        print('!!!!!!!!! slugify_function ', content, v)
+        return v
+    """
+
     # TODO: vmware ? construire ID sur même model que Azure
-    id = models.CharField(primary_key=True, max_length=1024)
+    resource_id = models.CharField(unique=True, max_length=1024)
+
+    slug = AutoSlugField(max_length=1024, populate_from=['resource_id'], 
+                        slugify_function=utils.slugify_resource_id_function, 
+                        overwrite=True, unique=True, blank=False)
 
     name = models.CharField(max_length=255)
 
@@ -195,6 +212,8 @@ class Resource(BaseModel):
 
     # TODO: limit choices same provider
     resource_type = models.ForeignKey(ResourceType, on_delete=models.PROTECT)
+
+    company = models.ForeignKey(Company, on_delete=models.PROTECT)
 
     # TODO: limit choices same provider
     tags = models.ManyToManyField(Tag)
@@ -208,7 +227,7 @@ class Resource(BaseModel):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name} ({self.pk})"
+        return f"{self.name} ({self.resource_id})"
 
     def to_dict(self, fields=None, exclude=[]):
         exclude = exclude or []
@@ -217,6 +236,7 @@ class Resource(BaseModel):
 
         data = super().to_dict(fields=fields, exclude=exclude)
         data['resource_type'] = self.resource_type.name
+        data['company'] = self.company.name
 
         if self.metas:
             data['metas'] = dict(self.metas)

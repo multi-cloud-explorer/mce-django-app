@@ -29,7 +29,7 @@ def test_resource_type_error_if_exist():
             name="aws.ec2.instance",
             provider=constants.Provider.AWS
         )        
-    print('!!! : ', str(excinfo.value))
+
     assert excinfo.value.message_dict == {
         'name': ['Resource type with this Name already exists.']
     }

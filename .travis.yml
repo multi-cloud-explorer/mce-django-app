@@ -10,24 +10,34 @@ services:
 
 jobs:
   include:
-    - name: "Python 3.7 on Linux Ubuntu"
+    - name: "Python 3.7 on Linux Ubuntu - SQLITE"
+      python: 3.7
+      env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=sqlite DATABASE_URL=sqlite:////tmp/test-sqlite.db
+    - name: "Python 3.7 on Linux Ubuntu - PSQL"
       python: 3.7
       env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=psql DATABASE_URL=postgres://travis:travis@localhost/mcetest
-
+    - name: "Python 3.7 on Linux Ubuntu - MYSQL"
+      python: 3.7
+      env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=mysql DATABASE_URL=mysql://travis:travis@localhost/mcetest
+  
 before_install:
   - python -m pip install --upgrade pip
-  - if [[ $TEST_DB_ENGINE == psql ]]; then
+
+  - if [[ "$TEST_DB_ENGINE" == "sqlite" ]]; then
+       pip install -e .[tests,dev];
+    fi
+
+  - if [[ "$TEST_DB_ENGINE" == "psql" ]]; then
        docker run -d -p 5432:5432 -e POSTGRES_DB=travis -e POSTGRES_USER=travis -e POSTGRES_PASSWORD=travis -e POSTGRES_DB=mcetest postgres:12-alpine;
-       pip install psycopg2-binary;
+       pip install -e .[psql,tests,dev];
     fi
 
 install:
-  - pip install -e .[tests,dev]
   - pip install coveralls
 
 script:
-  - black -S -t py37 --exclude \.migrations --check mce_django_app
-  - pytest
+  #- black -S -t py37 --exclude \.migrations --check mce_django_app
+  - coverage run -m pytest
 
 after_script:
   - coveralls

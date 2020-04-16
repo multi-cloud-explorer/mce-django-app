@@ -9,21 +9,30 @@ from mce_django_app.models import azure as models
 pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
 @freeze_time("2019-01-01")
-def test_resource_azure_success(subscription, resource_group, resource_type, tags):
+def test_resource_azure_success(
+    mce_app_azure_subscription, 
+    mce_app_azure_resource_group, 
+    mce_app_company,
+    mce_app_resource_type_azure_vm, 
+    mce_app_tags_five):
 
     name = "vm1"
-    resource_id = f"/subscriptions/{subscription.pk}/resourceGroups/{resource_group.name}/providers/{resource_type.name}/{name}"
+    resource_id = f"/subscriptions/{mce_app_azure_subscription.subscription_id}/resourceGroups/{mce_app_azure_resource_group.name}/providers/{mce_app_resource_type_azure_vm.name}/{name}"
 
     resource = models.ResourceAzure.objects.create(
-        id=resource_id,
+        resource_id=resource_id,
         name=name,
-        resource_type=resource_type,
-        resource_group=resource_group,
-        subscription=subscription,
+        company=mce_app_company,
+        resource_type=mce_app_resource_type_azure_vm,
+        resource_group=mce_app_azure_resource_group,
+        subscription=mce_app_azure_subscription,
         provider=constants.Provider.AZURE,
         location="francecentral",
     )
-    resource.tags.set(tags)
+
+    assert resource.slug == f"subscriptions-{mce_app_azure_subscription.subscription_id}-resourcegroups-rg1-providers-microsoft-classiccompute-virtualmachines-vm1"
+
+    resource.tags.set(mce_app_tags_five)
 
     assert resource.provider == constants.Provider.AZURE
     assert resource.tags.count() == 5
@@ -36,13 +45,18 @@ def test_resource_azure_success(subscription, resource_group, resource_type, tag
 
     assert resource.updated is None
 
-def test_resource_azure_error_with_null_or_blank(subscription, resource_group, resource_type):
+def test_resource_azure_error_with_null_or_blank(
+    mce_app_azure_subscription, 
+    mce_app_azure_resource_group, 
+    mce_app_company,
+    mce_app_resource_type_azure_vm):
     """test error for null or blank values"""
 
     with pytest.raises(ValidationError) as excinfo:
         models.ResourceAzure.objects.create(
-            id=None,
+            resource_id=None,
             name=None,
+            company=None,
             resource_type=None,
             provider=None,
             location=None,
@@ -52,8 +66,9 @@ def test_resource_azure_error_with_null_or_blank(subscription, resource_group, r
             sku=None,
         )
     assert excinfo.value.message_dict == {
-        'id': ['This field cannot be null.'], 
+        'resource_id': ['This field cannot be null.'], 
         'name': ['This field cannot be null.'], 
+        'company': ['This field cannot be null.'], 
         'resource_type': ['This field cannot be null.'], 
         'provider': ['This field cannot be null.'], 
         'location': ['This field cannot be null.'], 
@@ -63,18 +78,19 @@ def test_resource_azure_error_with_null_or_blank(subscription, resource_group, r
 
     with pytest.raises(ValidationError) as excinfo:
         models.ResourceAzure.objects.create(
-            id='',
+            resource_id='',
             name='',
-            resource_type=resource_type,
+            company=mce_app_company,
+            resource_type=mce_app_resource_type_azure_vm,
             provider='',
             location='',
-            subscription=subscription,
-            resource_group=resource_group,
+            subscription=mce_app_azure_subscription,
+            resource_group=mce_app_azure_resource_group,
             kind='',
             sku={},
         )
     assert excinfo.value.message_dict == {
-        'id': ['This field cannot be blank.'], 
+        'resource_id': ['This field cannot be blank.'], 
         'name': ['This field cannot be blank.'], 
         'provider': ['This field cannot be blank.'], 
         'location': ['This field cannot be blank.'], 
