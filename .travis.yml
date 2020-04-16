@@ -16,9 +16,9 @@ jobs:
     - name: "Python 3.7 on Linux Ubuntu - PSQL"
       python: 3.7
       env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=psql DATABASE_URL=postgres://travis:travis@localhost/mcetest
-    - name: "Python 3.7 on Linux Ubuntu - MYSQL"
-      python: 3.7
-      env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=mysql DATABASE_URL=mysql://travis:travis@localhost/mcetest
+    #- name: "Python 3.7 on Linux Ubuntu - MYSQL"
+    #  python: 3.7
+    #  env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=mysql DATABASE_URL=mysql://travis:travis@localhost/mcetest
   
 before_install:
   - python -m pip install --upgrade pip
