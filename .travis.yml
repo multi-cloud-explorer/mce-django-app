@@ -37,7 +37,7 @@ install:
 
 script:
   #- black -S -t py37 --exclude \.migrations --check mce_django_app
-  - coverage run -m pytest
+  - coverage run manage.py test
 
 after_script:
   - coveralls

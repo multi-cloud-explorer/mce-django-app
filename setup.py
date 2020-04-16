@@ -13,7 +13,7 @@ install_requires = [
     'djangorestframework',
 
     'django-dynamic-fixture', # for mce_django_app.pytest.plugin
-    'pytest',                 # for mce_django_app.pytest.plugin
+    'pytest>=5.4.1',          # for mce_django_app.pytest.plugin
 ]
 
 tests_requires = [
