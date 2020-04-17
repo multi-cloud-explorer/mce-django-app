@@ -108,6 +108,23 @@ class ResourceAzure(Resource):
             data['sku'] = dict(self.sku)
         return data
 
+"""
+TODO: class ResourceAzureVM(ResourceAzure):
+
+properties: dict = {}
+plan: dict = {}
+managedBy: str = None
+
+dns_name
+ip_address
+os_type
+os_name
+state (si vm : started|stopped)
+sync_state: new|???
+geo localisation ?
+"""
+
+
 
 def _create_event_change(sender, instance=None, created=None, **kwargs):
     if created:

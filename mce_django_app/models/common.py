@@ -89,6 +89,10 @@ class Company(BaseModel):
 
     slug = AutoSlugField(populate_from=['name'], overwrite=True, unique=True, blank=False)
 
+    class Meta:
+        verbose_name = _("Entreprise")
+        verbose_name_plural = _("Entreprises")
+
 class ResourceEventChange(BaseModel):
 
     action = models.CharField(max_length=10, choices=constants.EventChangeType.choices)
@@ -103,7 +107,7 @@ class ResourceEventChange(BaseModel):
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
 
-    object_id = models.CharField(max_length=1024)
+    object_id = models.CharField(max_length=1024, verbose_name=_("Id"))
 
     content_object = GenericForeignKey(
         'content_type', 'object_id', for_concrete_model=False
@@ -171,33 +175,14 @@ class ResourceType(BaseModel):
 
     provider = models.CharField(max_length=255, choices=constants.Provider.choices)
 
+    # TODO: active ou exclude
+
     def __str__(self):
         return f"{self.provider} - {self.name}"
 
 
 class Resource(BaseModel):
-    """"""
-
-    """
-    properties: dict = {}
-    plan: dict = {}
-    managedBy: str = None
-
-    dns_name
-    ip_address
-    os_type
-    os_name
-    state (si vm : started|stopped)
-    sync_state: new|???
-    geo localisation ?
-    """
-
-    """
-    def slugify_function(self, content):
-        v = utils.slugify_resource_id_function(content)
-        print('!!!!!!!!! slugify_function ', content, v)
-        return v
-    """
+    """Generic Resource"""
 
     # TODO: vmware ? construire ID sur même model que Azure
     resource_id = models.CharField(unique=True, max_length=1024)

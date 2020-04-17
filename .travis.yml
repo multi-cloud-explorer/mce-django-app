@@ -12,13 +12,13 @@ jobs:
   include:
     - name: "Python 3.7 on Linux Ubuntu - SQLITE"
       python: 3.7
-      env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=sqlite DATABASE_URL=sqlite:////tmp/test-sqlite.db
+      env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=sqlite DATABASE_URL=sqlite:////tmp/test-sqlite.db CACHE_URL=redis://127.0.0.1:6379/0
     - name: "Python 3.7 on Linux Ubuntu - PSQL"
       python: 3.7
-      env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=psql DATABASE_URL=postgres://travis:travis@localhost/mcetest
+      env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=psql DATABASE_URL=postgres://travis:travis@localhost/mcetest CACHE_URL=redis://127.0.0.1:6379/0
     #- name: "Python 3.7 on Linux Ubuntu - MYSQL"
     #  python: 3.7
-    #  env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=mysql DATABASE_URL=mysql://travis:travis@localhost/mcetest
+    #  env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=mysql DATABASE_URL=mysql://travis:travis@localhost/mcetest CACHE_URL=redis://127.0.0.1:6379/0
   
 before_install:
   - python -m pip install --upgrade pip

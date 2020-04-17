@@ -38,6 +38,6 @@ INSTALLED_APPS = [
 
 pip install -e .[tests]
 
-DATABASE_URL=postgres://mce:password@127.0.0.1:5432/mce pytest
+DATABASE_URL=postgres://mce:password@127.0.0.1:5432/mce ./manage.py test
 ```
 
