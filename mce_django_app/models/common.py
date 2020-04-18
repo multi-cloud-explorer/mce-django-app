@@ -8,8 +8,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
 from django_extensions.db.fields import AutoSlugField
-from model_utils.models import SoftDeletableModel
-from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 from django_cryptography.fields import encrypt
 
 from mce_django_app import utils
@@ -25,32 +23,10 @@ __all__ = [
 ]
 
 # TODO: order_by default and others Metas
-
-
-class CustomSoftDeletableQuerySet(SoftDeletableQuerySet):
-    def delete(self):
-        """
-        Soft delete objects from queryset (set their ``is_removed``
-        field to True)
-        """
-        return self.update(is_removed=True)
-
-
-class CustomSoftDeletableManager(SoftDeletableManager):
-
-    _queryset_class = CustomSoftDeletableQuerySet
-
-
 # TODO: permissions ? owner/owner_group ?
-class BaseModel(SoftDeletableModel):
-    """Base for all MCE models
-    
-    Model.objects return only is_removed=False
-    
-    Use Model.all_objects for all datas
-    """
 
-    objects = CustomSoftDeletableManager()
+class BaseModel(models.Model):
+    """Base for all MCE models"""
 
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
@@ -130,11 +106,17 @@ class GenericAccount(BaseModel):
         max_length=255, null=True, blank=True, verbose_name=_("Description")
     )
 
-    username = models.CharField(max_length=255, verbose_name=_("Username or Client ID"))
+    url = models.CharField(max_length=2048, null=True, blank=True)
+
+    username = models.CharField(max_length=255, verbose_name=_("Username or Client ID"), null=True, blank=True)
 
     password = encrypt(
-        models.CharField(max_length=255, verbose_name=_("Password or Secret Key"))
+        models.CharField(max_length=255, verbose_name=_("Password or Secret Key"), null=True, blank=True)
     )
+
+    company = models.ForeignKey(Company, on_delete=models.PROTECT)
+
+    settings = utils.JSONField(default={}, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.description})"

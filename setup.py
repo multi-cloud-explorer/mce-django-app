@@ -7,7 +7,6 @@ install_requires = [
     'Django>=3.0',
     'django-extensions',
     'django-cryptography',
-    'django-model-utils',
     'django-guardian',
     'python-slugify',
     'djangorestframework',
@@ -36,13 +35,11 @@ tests_requires = [
     'django-environ',
     'django-filter',
     'django-select2',
-    'django-crispy-forms',
+    'django-daterangefilter',
 
     'django-cors-headers',
     'djoser',
     'drf-yasg',
-
-    'django-allauth',
 
     'jsonpatch'
 ]

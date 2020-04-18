@@ -3,6 +3,8 @@ from django.contrib.admin import ModelAdmin
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
+from daterangefilter.filters import PastDateRangeFilter
+
 from mce_django_app.models import common as models
 
 """
@@ -40,7 +42,7 @@ class BaseModelAdmin(ModelAdmin):
     #actions_on_top = True
     #actions_on_bottom = True
     show_full_result_count = False # perfs
-    exclude = ['is_removed']
+    #exclude = ['is_removed']
 
 class ReadOnlyModelAdminMixIn:
 
@@ -60,9 +62,15 @@ class ReadOnlyModelAdminMixIn:
 
 @admin.register(models.ResourceEventChange)
 class ResourceEventChangeAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
+    icon_name = 'access_time'
     date_hierarchy = 'created'
     list_display = ('object_id', '__str__', 'action', 'created')
     list_filter = ['action']
+    list_filter = [
+        ('created', PastDateRangeFilter), 
+        'action',
+        #('action', admin.SimpleListFilter)
+    ]
     list_select_related = ['content_type']
     readonly_fields = ['object_id', 'content_type', 'action', 'created']
 

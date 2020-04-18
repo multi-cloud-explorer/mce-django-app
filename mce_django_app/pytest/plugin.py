@@ -63,8 +63,8 @@ def mce_app_tags_five():
     return G(common.Tag, n=5)
 
 @pytest.fixture
-def mce_app_generic_account():
-    return G(common.GenericAccount)
+def mce_app_generic_account(mce_app_company):
+    return G(common.GenericAccount, company=mce_app_company)
 
 @pytest.fixture
 def mce_app_resource(mce_app_resource_type, mce_app_company):

@@ -10,7 +10,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Subscription
-        exclude = ['is_removed']
+        fields = '__all__'
 
 
 class ResourceGroupAzureSerializer(ResourceSerializer):
@@ -19,7 +19,7 @@ class ResourceGroupAzureSerializer(ResourceSerializer):
 
     class Meta:
         model = models.ResourceGroupAzure
-        exclude = ['is_removed']
+        fields = '__all__'
 
 
 class ResourceAzureSerializer(ResourceSerializer):
@@ -32,6 +32,6 @@ class ResourceAzureSerializer(ResourceSerializer):
 
     class Meta:
         model = models.ResourceAzure
-        exclude = ['is_removed']
+        fields = '__all__'
 
 

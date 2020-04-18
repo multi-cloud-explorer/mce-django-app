@@ -33,18 +33,14 @@ INSTALLED_APPS = [
 
     'django_select2',
     'django_filters',
-    'crispy_forms',
     'django_extensions',
+    'daterangefilter',
 
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
     'drf_yasg',
     'corsheaders',
-
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
 
     'mce_django_app',
 ]
@@ -112,7 +108,6 @@ LOGIN_URL = 'admin:login'
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
 )
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -197,8 +192,6 @@ TEST_RUNNER = 'project_test.runner.PytestTestRunner'
 
 DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE = 10
 DJANGO_DB_LOGGER_ENABLE_FORMATTER = False
-
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 CORS_ORIGIN_ALLOW_ALL = True
 

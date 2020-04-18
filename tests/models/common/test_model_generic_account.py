@@ -8,14 +8,15 @@ pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 from mce_django_app import constants
 from mce_django_app.models import common as models
 
-def test_generic_account_success():
+def test_generic_account_success(mce_app_company):
     
     # create simple account
     account = models.GenericAccount.objects.create(
         name="test",
-        description="TEST",
-        username="USER1",
-        password="password"
+        #description="TEST",
+        #username="USER1",
+        #password="password",
+        company=mce_app_company
     )
 
 @pytest.mark.skip("TODO")

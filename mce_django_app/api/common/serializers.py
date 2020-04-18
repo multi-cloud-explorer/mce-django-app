@@ -6,31 +6,36 @@ class CompanySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Company
-        exclude = ['is_removed']
+        fields = '__all__'
+
 
 class ResourceEventChangeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ResourceEventChange
-        exclude = ['is_removed']
+        fields = '__all__'
+
 
 class GenericAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.GenericAccount
-        exclude = ['is_removed']
+        fields = '__all__'
+
 
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Tag
-        exclude = ['is_removed']
+        fields = '__all__'
+
 
 class ResourceTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ResourceType
-        exclude = ['is_removed']
+        fields = '__all__'
+
 
 class ResourceSerializer(serializers.ModelSerializer):
 
@@ -50,5 +55,6 @@ class ResourceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Resource
-        exclude = ['is_removed']
+        fields = '__all__'
+
 
