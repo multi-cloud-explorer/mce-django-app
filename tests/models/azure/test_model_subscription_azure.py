@@ -1,16 +1,13 @@
 from uuid import uuid4
 
 import pytest
-from django.db.utils import IntegrityError
+
 from django.core.exceptions import ValidationError
 
-from freezegun import freeze_time
-
-pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
-
-from mce_django_app.models.common import GenericAccount
 from mce_django_app import constants
 from mce_django_app.models import azure as models
+
+CURRENT_MODEL = models.SubscriptionAzure
 
 def test_subscription_azure(mce_app_generic_account, mce_app_company):
     """Create Azure Subscription"""
@@ -18,7 +15,7 @@ def test_subscription_azure(mce_app_generic_account, mce_app_company):
     subscription_id = str(uuid4())
     subscription_tenant = str(uuid4())
 
-    subscription = models.Subscription.objects.create(
+    subscription = CURRENT_MODEL.objects.create(
         subscription_id=subscription_id,
         name="sub1",
         company=mce_app_company,
@@ -27,11 +24,12 @@ def test_subscription_azure(mce_app_generic_account, mce_app_company):
         account=mce_app_generic_account
     )
 
-    assert subscription.provider == constants.Provider.AZURE
     assert subscription.is_china is False
     assert subscription.active is True
+
+    assert hasattr(mce_app_generic_account, 'mce_django_app_subscriptionazure_related') is True
     
-    assert mce_app_generic_account.subscriptions_azure.first() == subscription
+    assert mce_app_generic_account.mce_django_app_subscriptionazure_related.first() == subscription
 
     auth = subscription.get_auth()
 

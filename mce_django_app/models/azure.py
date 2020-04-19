@@ -9,48 +9,21 @@ from mce_django_app import constants
 from mce_django_app.models.common import (
     BaseModel,
     Resource,
-    GenericAccount,
+    BaseSubscription,
     ResourceEventChange,
-    Company,
 )
 
 # TODO: Azure Account avec tenant optionnel
 
 
-class Subscription(BaseModel):
+class SubscriptionAzure(BaseSubscription):
     """Cloud Subscription Model"""
 
-    subscription_id = models.CharField(unique=True, max_length=255)
-
-    name = models.CharField(max_length=255)
-
     tenant = models.CharField(max_length=255)
-
-    company = models.ForeignKey(Company, on_delete=models.PROTECT)
 
     location = models.CharField(max_length=255)
 
     is_china = models.BooleanField(default=False)
-
-    # TODO: limit_choices_to={''}
-    provider = models.CharField(
-        max_length=255,
-        default=constants.Provider.AZURE,
-        choices=constants.Provider.choices,
-        editable=False,
-    )
-
-    account = models.ForeignKey(
-        GenericAccount,
-        related_name="subscriptions_azure",
-        on_delete=models.PROTECT,
-        null=True,
-    )
-
-    active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.name
 
     def get_auth(self):
         """Auth format for `mce_azure.utils.get_access_token`"""
@@ -67,17 +40,12 @@ class Subscription(BaseModel):
             data["password"] = self.account.password
         return data
 
-    #def to_dict(self, fields=None, exclude=None):
-    #    data = super().to_dict(fields=fields, exclude=exclude)
-    #    data['id'] = str(self.pk)
-    #    return data
-
 
 class ResourceGroupAzure(Resource):
 
     location = models.CharField(max_length=255)
 
-    subscription = models.ForeignKey(Subscription, on_delete=models.PROTECT)
+    subscription = models.ForeignKey(SubscriptionAzure, on_delete=models.PROTECT)
 
     def to_dict(self, fields=None, exclude=None):
         data = super().to_dict(fields=fields, exclude=exclude)
@@ -92,7 +60,7 @@ class ResourceAzure(Resource):
 
     location = models.CharField(max_length=255)
 
-    subscription = models.ForeignKey(Subscription, on_delete=models.PROTECT)
+    subscription = models.ForeignKey(SubscriptionAzure, on_delete=models.PROTECT)
 
     resource_group = models.ForeignKey(ResourceGroupAzure, on_delete=models.PROTECT)
 

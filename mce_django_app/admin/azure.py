@@ -25,7 +25,7 @@ def resource_group_name(obj):
 resource_group_name.short_description = _('Groupe de Ressource')
 
 
-@admin.register(models.Subscription)
+@admin.register(models.SubscriptionAzure)
 class SubscriptionAzureAdmin(BaseModelAdmin):
     list_display = ('subscription_id', 'name', company_name, 'location', 'tenant')
     search_fields = ['subscription_id', 'name']

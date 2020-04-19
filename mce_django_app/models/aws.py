@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mce_django_app import utils
 from mce_django_app import constants
-from mce_django_app.models.common import BaseModel, Resource, GenericAccount
+from mce_django_app.models.common import BaseModel, Resource, GenericAccount, BaseSubscription
 
 """
 Regions:
@@ -22,27 +22,10 @@ print('Regions:', response['Regions'])
 """
 
 
-class Subscription(BaseModel):
-    """Cloud Subscription Model"""
-
-    id = models.CharField(primary_key=True, max_length=255)
-
-    name = models.CharField(max_length=255)
+class SubscriptionAWS(BaseSubscription):
+    """AWS Subscription Model"""
 
     # TODO: delegation role
-
-    provider = models.CharField(
-        max_length=10,
-        default=constants.Provider.AWS,
-        choices=constants.Provider.choices,
-    )
-
-    account = models.ForeignKey(
-        GenericAccount, related_name="subscriptions_aws", on_delete=models.PROTECT
-    )
-
-    def __str__(self):
-        return self.name
 
 
 class ResourceAWS(Resource):
@@ -80,4 +63,4 @@ class ResourceAWS(Resource):
     'StateTransitionReason': None,
     """
 
-    subscription = models.ForeignKey(Subscription, on_delete=models.PROTECT)
+    subscription = models.ForeignKey(SubscriptionAWS, on_delete=models.PROTECT)

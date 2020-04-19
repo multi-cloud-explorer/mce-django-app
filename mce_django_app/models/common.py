@@ -15,6 +15,8 @@ from mce_django_app import constants
 
 __all__ = [
     'BaseModel',
+    'BaseSubscription',
+    'Company',
     'GenericAccount',
     'Tag',
     'ResourceType',
@@ -69,6 +71,7 @@ class Company(BaseModel):
         verbose_name = _("Entreprise")
         verbose_name_plural = _("Entreprises")
 
+
 class ResourceEventChange(BaseModel):
 
     action = models.CharField(max_length=10, choices=constants.EventChangeType.choices)
@@ -83,7 +86,8 @@ class ResourceEventChange(BaseModel):
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
 
-    object_id = models.CharField(max_length=1024, verbose_name=_("Id"))
+    #object_id = models.CharField(max_length=1024, verbose_name=_("Id"))
+    object_id = models.PositiveIntegerField()
 
     content_object = GenericForeignKey(
         'content_type', 'object_id', for_concrete_model=False
@@ -149,9 +153,49 @@ class Tag(BaseModel):
         return self.name
 
 
+class BaseSubscription(BaseModel):
+    """Base for Subscription Model"""
+
+    subscription_id = models.CharField(unique=True, max_length=1024)
+
+    name = models.CharField(max_length=255)
+
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT,
+        related_name="%(app_label)s_%(class)s_related",
+        related_query_name="%(app_label)s_%(class)ss"
+    )
+
+    account = models.ForeignKey(
+        GenericAccount,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="%(app_label)s_%(class)s_related",
+        related_query_name="%(app_label)s_%(class)ss",
+    )
+
+    active = models.BooleanField(default=True)
+
+    def get_auth(self):
+        raise NotImplementedError()
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        abstract = True
+
+
 class ResourceType(BaseModel):
 
     name = models.CharField(max_length=255, unique=True)
+
+    slug = AutoSlugField(
+                            max_length=1024, 
+                            populate_from=['name'], 
+                            overwrite=True, 
+                            unique=True, 
+                            blank=False)
 
     description = models.CharField(max_length=255, null=True, blank=True)
 
@@ -211,3 +255,4 @@ class Resource(BaseModel):
         data["tags"] = [tag.to_dict(exclude=exclude) for tag in self.tags.all()]
 
         return data
+

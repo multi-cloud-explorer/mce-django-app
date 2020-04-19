@@ -16,7 +16,7 @@ def test_resource_type_aws():
         provider=constants.Provider.AWS
     )
 
-def test_resource_type_error_if_exist():
+def test_resource_type_error_duplicate():
     """check error if resource_type exist"""
 
     models.ResourceType.objects.create(

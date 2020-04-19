@@ -77,9 +77,9 @@ class ResourceEventChangeAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
 
 @admin.register(models.GenericAccount)
 class GenericAccountAdmin(BaseModelAdmin):
-    list_display = ('name', 'description', 'username')
+    list_display = ('name', 'description', 'username', company_name)
     search_fields = ['name']
-    #sortable_by = ['name', 'username']
+    list_select_related = ['company']
 
 
 @admin.register(models.Company)

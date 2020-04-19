@@ -5,10 +5,10 @@ from mce_django_app.models import azure as models
 
 from . import serializers
 
-class SubscriptionViewSet(viewsets.ModelViewSet):
+class SubscriptionAzureViewSet(viewsets.ModelViewSet):
 
-    queryset = models.Subscription.objects.all()
-    serializer_class = serializers.SubscriptionSerializer
+    queryset = models.SubscriptionAzure.objects.all()
+    serializer_class = serializers.SubscriptionAzureSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 class ResourceGroupAzureViewSet(viewsets.ModelViewSet):
