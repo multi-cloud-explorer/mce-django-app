@@ -11,7 +11,7 @@ install_requires = [
     'python-slugify',
     'djangorestframework',
 
-    'django-dynamic-fixture', # for mce_django_app.pytest.plugin
+    'django-dynamic-fixture>=3.1.0', # for mce_django_app.pytest.plugin
     'pytest>=5.4.1',          # for mce_django_app.pytest.plugin
 ]
 
@@ -22,7 +22,7 @@ tests_requires = [
     'pytest-pep8',
     'pytest-django',
     'pytest-timeout',
-    'django-dynamic-fixture',
+    'django-dynamic-fixture>=3.1.0',
     'pytest-instafail',
     'curlify',
     'factory-boy',
@@ -41,7 +41,6 @@ tests_requires = [
     'djoser',
     'drf-yasg',
 
-    'jsonpatch'
 ]
 
 dev_requires = [
