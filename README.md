@@ -8,14 +8,13 @@
 
 [Documentation](https://multi-cloud-explorer.readthedocs.org)
 
-## Providers implémentés
-
-- [x] Azure
-- [ ] AWS
-- [ ] GCP
-- [ ] VMware
-
 ## Integrate in your Django Project
+
+**Install:**
+
+```bash
+pip install git+https://github.com/multi-cloud-explorer/mce-django-app.git
+```
 
 **Add to settings.py:**
 
@@ -38,6 +37,10 @@ INSTALLED_APPS = [
 
 pip install -e .[tests]
 
+# With sqlite:
+./manage.py test
+
+# With PostgreSQL:
 DATABASE_URL=postgres://mce:password@127.0.0.1:5432/mce ./manage.py test
 ```
 
