@@ -16,6 +16,9 @@ Microsoft.ClassicCompute/virtualMachines
 Microsoft.Sql/servers/databases
 """
 
+def pytest_configure(config):
+    config.addinivalue_line("markers", "mce_bug: mark test as known bug")
+
 @pytest.fixture
 def mce_app_company():
     return G(common.Company, name="my-company")
@@ -100,7 +103,7 @@ def mce_app_azure_subscription(
     mce_app_generic_account,
     mce_app_company):
 
-    return azure.Subscription.objects.create(
+    return azure.SubscriptionAzure.objects.create(
         subscription_id=str(uuid4()),
         name="sub1",
         company=mce_app_company,
