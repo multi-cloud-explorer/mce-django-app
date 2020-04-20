@@ -121,6 +121,3 @@ def test_resource_error_max_length(mce_app_resource_type, mce_app_company):
         'name': ['Ensure this value has at most 255 characters (it has 256).'], 
     }
 
-@pytest.mark.skip("TODO")
-def test_resource_on_delete():
-    """test delete propagation"""

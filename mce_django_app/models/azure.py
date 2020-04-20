@@ -7,7 +7,6 @@ from django.dispatch import receiver
 from mce_django_app import utils
 from mce_django_app import constants
 from mce_django_app.models.common import (
-    BaseModel,
     Resource,
     BaseSubscription,
     ResourceEventChange,

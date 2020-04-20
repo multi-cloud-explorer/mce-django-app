@@ -1,5 +1,7 @@
 from itertools import chain
 
+from furl import furl
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.fields import GenericRelation
@@ -63,9 +65,11 @@ class BaseModel(models.Model):
 
 class Company(BaseModel):
 
-    name = models.CharField(max_length=255)
+    # TODO: is_default !!!
+    # TODO: unique ?
+    name = models.CharField(max_length=255, unique=True)
 
-    slug = AutoSlugField(populate_from=['name'], overwrite=True, unique=True, blank=False)
+    slug = AutoSlugField(populate_from=['name'], overwrite=True, unique=True)
 
     class Meta:
         verbose_name = _("Entreprise")
@@ -118,9 +122,25 @@ class GenericAccount(BaseModel):
         models.CharField(max_length=255, verbose_name=_("Password or Secret Key"), null=True, blank=True)
     )
 
-    company = models.ForeignKey(Company, on_delete=models.PROTECT)
+    # TODO: null=True pour compte hors Company ?
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
 
     settings = utils.JSONField(default={}, null=True, blank=True)
+
+    @classmethod
+    def parse_url(cls, url):
+        url = furl(url)
+        base_url = url.origin + str(url.path)
+        data = dict(url.args) or {}
+        return (base_url, data)
+
+    def save(self, **kwargs):
+        if self.url and "?" in self.url:
+            url, settings = GenericAccount.parse_url(self.url)
+            if settings:
+                self.settings.update(settings)
+                self.url = url
+        super().save(**kwargs)
 
     def __str__(self):
         return f"{self.name} ({self.description})"
@@ -168,7 +188,7 @@ class BaseSubscription(BaseModel):
 
     account = models.ForeignKey(
         GenericAccount,
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         null=True,
         related_name="%(app_label)s_%(class)s_related",
         related_query_name="%(app_label)s_%(class)ss",
@@ -190,12 +210,12 @@ class ResourceType(BaseModel):
 
     name = models.CharField(max_length=255, unique=True)
 
+    # FIXME: supp blank
     slug = AutoSlugField(
                             max_length=1024, 
                             populate_from=['name'], 
                             overwrite=True, 
-                            unique=True, 
-                            blank=False)
+                            unique=True)
 
     description = models.CharField(max_length=255, null=True, blank=True)
 
@@ -215,7 +235,7 @@ class Resource(BaseModel):
 
     slug = AutoSlugField(max_length=1024, populate_from=['resource_id'], 
                         slugify_function=utils.slugify_resource_id_function, 
-                        overwrite=True, unique=True, blank=False)
+                        overwrite=True, unique=True)
 
     name = models.CharField(max_length=255)
 

@@ -82,6 +82,3 @@ def test_resource_event_change_create_and_delete(mce_app_resource):
 
     assert mce_app_resource.changes.count() == 2
 
-@pytest.mark.skip("TODO")
-def test_resource_event_change_on_delete():
-    """test delete propagation"""

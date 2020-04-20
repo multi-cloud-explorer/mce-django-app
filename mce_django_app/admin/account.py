@@ -1,17 +1,17 @@
 from django.contrib.auth.models import Group, User
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth import get_user_model
 
-from mce_django_app.models import account as models
+from rest_framework.authtoken.models import Token
+
 from mce_django_app.admin.common import BaseModelAdmin
 
-try:
-    admin.site.unregister(Group)
-    admin.site.unregister(User)
-except:
-    pass
+USER_MODEL = get_user_model()
 
-@admin.register(models.User)
+admin.site.unregister(Group)
+admin.site.unregister(Token)
+
+@admin.register(USER_MODEL)
 class UserAdmin(BaseModelAdmin):
     pass
 

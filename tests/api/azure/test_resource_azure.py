@@ -1,10 +1,10 @@
 from rest_framework.reverse import reverse
 
-def test_resource_azure_detail(client, mce_app_azure_resource, mce_app_company_user):
+def test_resource_azure_detail(client, mce_app_resource_azure, mce_app_user_with_company):
 
-    client.force_authenticate(user=mce_app_company_user)#, token=token)
+    client.force_authenticate(user=mce_app_user_with_company)#, token=token)
 
-    url = reverse("azure:resourceazure-detail", args=[mce_app_azure_resource.pk])
+    url = reverse("azure:resourceazure-detail", args=[mce_app_resource_azure.pk])
 
     response = client.get(url, format="json")
 

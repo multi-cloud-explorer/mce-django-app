@@ -10,27 +10,27 @@ pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
 @freeze_time("2019-01-01")
 def test_resource_azure_success(
-    mce_app_azure_subscription, 
-    mce_app_azure_resource_group, 
+    mce_app_subscription_azure, 
+    mce_app_resource_group_azure, 
     mce_app_company,
     mce_app_resource_type_azure_vm, 
     mce_app_tags_five):
 
     name = "vm1"
-    resource_id = f"/subscriptions/{mce_app_azure_subscription.subscription_id}/resourceGroups/{mce_app_azure_resource_group.name}/providers/{mce_app_resource_type_azure_vm.name}/{name}"
+    resource_id = f"/subscriptions/{mce_app_subscription_azure.subscription_id}/resourceGroups/{mce_app_resource_group_azure.name}/providers/{mce_app_resource_type_azure_vm.name}/{name}"
 
     resource = models.ResourceAzure.objects.create(
         resource_id=resource_id,
         name=name,
         company=mce_app_company,
         resource_type=mce_app_resource_type_azure_vm,
-        resource_group=mce_app_azure_resource_group,
-        subscription=mce_app_azure_subscription,
+        resource_group=mce_app_resource_group_azure,
+        subscription=mce_app_subscription_azure,
         provider=constants.Provider.AZURE,
         location="francecentral",
     )
 
-    assert resource.slug == f"subscriptions-{mce_app_azure_subscription.subscription_id}-resourcegroups-rg1-providers-microsoft-classiccompute-virtualmachines-vm1"
+    assert resource.slug == f"subscriptions-{mce_app_subscription_azure.subscription_id}-resourcegroups-rg1-providers-microsoft-classiccompute-virtualmachines-vm1"
 
     resource.tags.set(mce_app_tags_five)
 
@@ -46,8 +46,8 @@ def test_resource_azure_success(
     assert resource.updated is None
 
 def test_resource_azure_error_with_null_or_blank(
-    mce_app_azure_subscription, 
-    mce_app_azure_resource_group, 
+    mce_app_subscription_azure, 
+    mce_app_resource_group_azure, 
     mce_app_company,
     mce_app_resource_type_azure_vm):
     """test error for null or blank values"""
@@ -84,8 +84,8 @@ def test_resource_azure_error_with_null_or_blank(
             resource_type=mce_app_resource_type_azure_vm,
             provider='',
             location='',
-            subscription=mce_app_azure_subscription,
-            resource_group=mce_app_azure_resource_group,
+            subscription=mce_app_subscription_azure,
+            resource_group=mce_app_resource_group_azure,
             kind='',
             sku={},
         )
@@ -96,6 +96,3 @@ def test_resource_azure_error_with_null_or_blank(
         'location': ['This field cannot be blank.'], 
     }
 
-@pytest.mark.skip("TODO")
-def test_resource_azure_on_delete():
-    """test delete propagation"""

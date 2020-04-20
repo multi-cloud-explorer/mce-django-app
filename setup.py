@@ -9,6 +9,7 @@ install_requires = [
     'django-cryptography',
     'django-guardian',
     'python-slugify',
+    'furl',
     'djangorestframework',
 
     'django-dynamic-fixture>=3.1.0', # for mce_django_app.pytest.plugin

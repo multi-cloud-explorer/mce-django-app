@@ -1,28 +1,64 @@
 import pytest
 
-from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 
-from mce_django_app import constants
 from mce_django_app.models import common as models
 
-@pytest.mark.skip("TODO")
 def test_company_success():
     """simple success create"""
 
-@pytest.mark.skip("TODO")
+    company = models.Company.objects.create(
+        name="Company Test",
+    )
+
+    assert company.slug == "company-test"
+
+
 def test_company_error_duplicate():
     """check error if duplicate object"""
 
-@pytest.mark.skip("TODO")
+    models.Company.objects.create(
+        name="Company Test",
+    )
+
+    with pytest.raises(ValidationError) as excinfo:
+        models.Company.objects.create(
+            name="Company Test",
+        )        
+
+    assert excinfo.value.message_dict == {
+        'name': ['Entreprise with this Name already exists.']
+    }
+
 def test_company_error_max_length():
     """Test max_length constraints"""
 
-@pytest.mark.skip("TODO")
+    with pytest.raises(ValidationError) as excinfo:
+        models.Company.objects.create(
+            name="x" * 256,
+        )
+    assert excinfo.value.message_dict == {
+        'name': ['Ensure this value has at most 255 characters (it has 256).'], 
+    }
+
+
 def test_company_error_null_and_blank_value():
     """test null and blank value"""
 
-@pytest.mark.skip("TODO")
-def test_company_on_delete():
-    """test delete propagation"""
+    with pytest.raises(ValidationError) as excinfo:
+        models.Company.objects.create(
+            name="",
+        )
+    assert excinfo.value.message_dict == {
+        'name': ['This field cannot be blank.'], 
+    }
+
+    with pytest.raises(ValidationError) as excinfo:
+        models.Company.objects.create(
+            name=None,
+        )
+    assert excinfo.value.message_dict == {
+        'name': ['This field cannot be null.'], 
+    }
+
 

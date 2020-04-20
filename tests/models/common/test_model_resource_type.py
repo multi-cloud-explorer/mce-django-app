@@ -7,7 +7,7 @@ pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 from mce_django_app import constants
 from mce_django_app.models import common as models
 
-def test_resource_type_aws():
+def test_resource_type_success():
     """create simple AWS ResourceType"""
 
     models.ResourceType.objects.create(
@@ -81,6 +81,3 @@ def test_resource_type_error_provider_choice():
         'provider': ["Value 'BADCHOICE' is not a valid choice."]
     }
 
-@pytest.mark.skip("TODO")
-def test_resource_type_on_delete():
-    """test delete propagation"""

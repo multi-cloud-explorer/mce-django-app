@@ -4,12 +4,11 @@ import pytest
 
 from django.core.exceptions import ValidationError
 
-from mce_django_app import constants
 from mce_django_app.models import azure as models
 
 CURRENT_MODEL = models.SubscriptionAzure
 
-def test_subscription_azure(mce_app_generic_account, mce_app_company):
+def test_subscription_azure_success(mce_app_generic_account, mce_app_company):
     """Create Azure Subscription"""
     
     subscription_id = str(uuid4())
@@ -42,17 +41,14 @@ def test_subscription_azure(mce_app_generic_account, mce_app_company):
     )
 
 @pytest.mark.skip("TODO")
-def test_subscription_error_duplicate():
+def test_subscription_azure_error_duplicate():
     """check error if subscription exist"""
 
 @pytest.mark.skip("TODO")
-def test_subscription_error_max_length():
+def test_subscription_azure_error_max_length():
     """Test max_length on name and description"""
 
 @pytest.mark.skip("TODO")
-def test_subscription_error_null_and_blank_value():
+def test_subscription_azure_error_null_and_blank_value():
     """test null and blank value"""
 
-@pytest.mark.skip("TODO")
-def test_subscription_on_delete():
-    """test delete propagation"""

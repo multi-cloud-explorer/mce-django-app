@@ -10,7 +10,7 @@ pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
 @freeze_time("2019-01-01")
 def test_resource_group_azure_success(
-    mce_app_azure_subscription, 
+    mce_app_subscription_azure, 
     mce_app_company,
     mce_app_tags_five):
 
@@ -20,14 +20,14 @@ def test_resource_group_azure_success(
     )
     
     name = "rg1"
-    resource_id = f"/subscriptions/{mce_app_azure_subscription.subscription_id}/resourceGroups/{name}/providers/{resource_type.name}/{name}"
+    resource_id = f"/subscriptions/{mce_app_subscription_azure.subscription_id}/resourceGroups/{name}/providers/{resource_type.name}/{name}"
     
     resource = models.ResourceGroupAzure.objects.create(
         resource_id=resource_id,
         name=name,
         company=mce_app_company,
         resource_type=resource_type,
-        subscription=mce_app_azure_subscription,
+        subscription=mce_app_subscription_azure,
         provider=constants.Provider.AZURE,
         location="francecentral",
     )
@@ -56,6 +56,3 @@ def test_resource_group_azure_error_max_length():
 def test_resource_group_azure_error_null_and_blank_value():
     """test null and blank value"""
 
-@pytest.mark.skip("TODO")
-def test_resource_group_azure_on_delete():
-    """test delete propagation"""
