@@ -10,6 +10,7 @@ install_requires = [
     'django-guardian',
     'python-slugify',
     'furl',
+    'jsonpatch>=1.25,<2',
     'djangorestframework',
     'django-daterangefilter',
 
@@ -56,6 +57,7 @@ dev_requires = [
     'django-debug-toolbar',
     'pygraphviz',
     'pydotplus',
+    'safety',
 ]
 
 ci_requires = [

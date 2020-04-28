@@ -1,0 +1,6 @@
+[bandit]
+recursive: true
+exclude: mce_django_app/_version.py,tests
+# skip : md5
+skips: B303
+#tests: B101,B102,B301

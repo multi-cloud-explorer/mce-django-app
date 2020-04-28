@@ -34,6 +34,7 @@ install:
 
 script:
   - ./manage.py test -- -m 'not mce_known_bug'
+  - bandit -r --ini .bandit mce_django_app -vv
 
 after_success:
   - coveralls
