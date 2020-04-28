@@ -5,6 +5,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/multi-cloud-explorer/mce-django-app/badge.svg?branch=master)](https://coveralls.io/github/multi-cloud-explorer/mce-django-app?branch=master)
 [![codecov](https://codecov.io/gh/multi-cloud-explorer/mce-django-app/branch/master/graph/badge.svg)](https://codecov.io/gh/multi-cloud-explorer/mce-django-app)
 [![Code Health](https://landscape.io/github/multi-cloud-explorer/mce-django-app/master/landscape.svg?style=flat)](https://landscape.io/github/multi-cloud-explorer/mce-django-app/master)
+[![Python 3](https://pyup.io/repos/github/multi-cloud-explorer/mce-django-app/python-3-shield.svg)](https://pyup.io/repos/github/multi-cloud-explorer/mce-django-app/)
+[![Updates](https://pyup.io/repos/github/multi-cloud-explorer/mce-django-app/shield.svg)](https://pyup.io/repos/github/multi-cloud-explorer/mce-django-app/)
 [![Requirements Status](https://requires.io/github/multi-cloud-explorer/mce-django-app/requirements.svg?branch=master)](https://requires.io/github/multi-cloud-explorer/mce-django-app/requirements/?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/multi-cloud-explorer/badge/?version=latest&style=flat-square)](https://multi-cloud-explorer.readthedocs.org)
 
