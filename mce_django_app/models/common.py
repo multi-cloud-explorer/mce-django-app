@@ -1,6 +1,7 @@
 from itertools import chain
 
 from furl import furl
+import jsonpatch
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
@@ -129,6 +130,44 @@ class ResourceEventChange(BaseModel):
         from django.core import serializers
         data = self.to_dict(fields=fields, exclude=exclude)
         #json.dumps(data, cls=DjangoJSONEncoder, indent=4)
+
+    @classmethod
+    def create_event_change_update(cls, old_obj, new_obj, resource):
+        """UPDATE Event for Resource"""
+
+        patch = jsonpatch.JsonPatch.from_diff(old_obj, new_obj)
+
+        from pprint import pprint
+
+        if patch.patch:
+            # msg = f"create event change update for {old_obj['resource_id']}"
+            # logger.info(msg)
+            # logger.debug(list(patch))
+            # print('-------------------------------------------------')
+            # print('!!!!!!!! : ', list(patch))
+            # pprint(old_obj)
+            # pprint(new_obj)
+            # print('-------------------------------------------------')
+
+            return cls.objects.create(
+                action=constants.EventChangeType.UPDATE,
+                content_object=resource,
+                changes=list(patch),
+                old_object=old_obj,
+                new_object=new_obj,
+                diff=None,
+            )
+
+    @classmethod
+    def create_event_change_delete(cls, queryset):
+        """DELETE Event for ResourceAzure and ResourceGroupAzure"""
+
+        for doc in queryset:
+            cls.objects.create(
+                action=constants.EventChangeType.DELETE,
+                content_object=doc,
+                old_object=doc.to_dict(exclude=['created', 'updated']),
+            )
 
     def __str__(self):
         return f"{self.content_type.app_label}.{self.content_type.model}: {self.object_id}"
