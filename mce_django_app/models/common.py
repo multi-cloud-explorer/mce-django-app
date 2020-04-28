@@ -2,6 +2,7 @@ from itertools import chain
 
 from furl import furl
 
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.fields import GenericRelation
@@ -18,8 +19,8 @@ from mce_django_app import constants
 __all__ = [
     'BaseModel',
     'BaseSubscription',
+    'Provider',
     'Company',
-    'GenericAccount',
     'Tag',
     'ResourceType',
     'Resource',
@@ -62,6 +63,21 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
+class Provider(BaseModel):
+
+    name = models.CharField(max_length=255, unique=True, choices=constants.Provider.choices)
+
+    slug = AutoSlugField(
+                            max_length=300,
+                            populate_from=['name'],
+                            overwrite=True,
+                            unique=True)
+
+    description = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
 
 class Company(BaseModel):
 
@@ -88,62 +104,77 @@ class ResourceEventChange(BaseModel):
 
     diff = models.TextField(null=True, blank=True)
 
+    # TODO: on_delete=models.SET_NULL, null=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
 
     #object_id = models.CharField(max_length=1024, verbose_name=_("Id"))
     object_id = models.PositiveIntegerField()
 
     content_object = GenericForeignKey(
-        'content_type', 'object_id', for_concrete_model=False
+        'content_type', 'object_id', for_concrete_model=True
     )
 
     # TODO: state: new|sended|consumed
+    def to_dict(self, fields=None, exclude=None):
+        data = super().to_dict(fields=fields, exclude=exclude)
+        data["content_type"] = {
+            "app_label": self.content_type.app_label,
+            "model": self.content_type.model,
+            "name": self.content_type.name,
+            "id": self.object_id
+        }
+        return data
+
+    def to_json(self, fields=None, exclude=None):
+        from django.core import serializers
+        data = self.to_dict(fields=fields, exclude=exclude)
+        #json.dumps(data, cls=DjangoJSONEncoder, indent=4)
 
     def __str__(self):
         return f"{self.content_type.app_label}.{self.content_type.model}: {self.object_id}"
 
 
-class GenericAccount(BaseModel):
-    """Store Login/Password"""
-
-    # TODO: settings pour auth et forms spécifique
-
-    name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
-
-    description = models.CharField(
-        max_length=255, null=True, blank=True, verbose_name=_("Description")
-    )
-
-    url = models.CharField(max_length=2048, null=True, blank=True)
-
-    username = models.CharField(max_length=255, verbose_name=_("Username or Client ID"), null=True, blank=True)
-
-    password = encrypt(
-        models.CharField(max_length=255, verbose_name=_("Password or Secret Key"), null=True, blank=True)
-    )
-
-    # TODO: null=True pour compte hors Company ?
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-
-    settings = utils.JSONField(default={}, null=True, blank=True)
-
-    @classmethod
-    def parse_url(cls, url):
-        url = furl(url)
-        base_url = url.origin + str(url.path)
-        data = dict(url.args) or {}
-        return (base_url, data)
-
-    def save(self, **kwargs):
-        if self.url and "?" in self.url:
-            url, settings = GenericAccount.parse_url(self.url)
-            if settings:
-                self.settings.update(settings)
-                self.url = url
-        super().save(**kwargs)
-
-    def __str__(self):
-        return f"{self.name} ({self.description})"
+# class GenericAccount(BaseModel):
+#     """Store Login/Password"""
+#
+#     # TODO: settings pour auth et forms spécifique
+#
+#     name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
+#
+#     description = models.CharField(
+#         max_length=255, null=True, blank=True, verbose_name=_("Description")
+#     )
+#
+#     url = models.CharField(max_length=2048, null=True, blank=True)
+#
+#     username = models.CharField(max_length=255, verbose_name=_("Username or Client ID"), null=True, blank=True)
+#
+#     password = encrypt(
+#         models.CharField(max_length=255, verbose_name=_("Password or Secret Key"), null=True, blank=True)
+#     )
+#
+#     # TODO: null=True pour compte hors Company ?
+#     company = models.ForeignKey(Company, on_delete=models.CASCADE)
+#
+#     settings = encrypt(utils.JSONField(default={}, null=True, blank=True))
+#
+#     @classmethod
+#     def parse_url(cls, url):
+#         url = furl(url)
+#         base_url = url.origin + str(url.path)
+#         data = dict(url.args) or {}
+#         return (base_url, data)
+#
+#     def save(self, **kwargs):
+#         if self.url and "?" in self.url:
+#             url, settings = GenericAccount.parse_url(self.url)
+#             if settings:
+#                 self.settings.update(settings)
+#                 self.url = url
+#         super().save(**kwargs)
+#
+#     def __str__(self):
+#         return f"{self.name} ({self.description})"
 
 
 class Tag(BaseModel):
@@ -153,9 +184,17 @@ class Tag(BaseModel):
 
     value = models.CharField(max_length=1024)
 
-    provider = models.CharField(
-        max_length=255, choices=constants.Provider.choices, null=True, blank=True
-    )
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT, null=True, blank=True)
+
+    @property
+    def provider_name(self):
+        return self.provider.name
+
+    def to_dict(self, fields=None, exclude=[]):
+        data = super().to_dict(fields=fields, exclude=exclude)
+        if self.provider:
+            data["provider"] = self.provider.name
+        return data
 
     class Meta:
         constraints = [
@@ -173,10 +212,18 @@ class Tag(BaseModel):
         return self.name
 
 
+# TODO: Faire BaseRegion ou BaseLocation pour tous ?
+
 class BaseSubscription(BaseModel):
     """Base for Subscription Model"""
 
     subscription_id = models.CharField(unique=True, max_length=1024)
+
+    # TODDDDO: slug = AutoSlugField(
+    #                         max_length=1024,
+    #                         populate_from=['subscription_id'],
+    #                         overwrite=True,
+    #                         unique=True)
 
     name = models.CharField(max_length=255)
 
@@ -186,21 +233,31 @@ class BaseSubscription(BaseModel):
         related_query_name="%(app_label)s_%(class)ss"
     )
 
-    account = models.ForeignKey(
-        GenericAccount,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="%(app_label)s_%(class)s_related",
-        related_query_name="%(app_label)s_%(class)ss",
-    )
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
+
+    #account = models.ForeignKey(
+    #    GenericAccount,
+    #    on_delete=models.SET_NULL,
+    #    null=True,
+    #    related_name="%(app_label)s_%(class)s_related",
+    #    related_query_name="%(app_label)s_%(class)ss",
+    #)
 
     active = models.BooleanField(default=True)
+
+    @property
+    def company_name(self):
+        return self.company.name
+
+    @property
+    def provider_name(self):
+        return self.provider.name
 
     def get_auth(self):
         raise NotImplementedError()
 
     def __str__(self):
-        return self.name
+        return f"{self.provider.name} - {self.name}"
     
     class Meta:
         abstract = True
@@ -210,7 +267,6 @@ class ResourceType(BaseModel):
 
     name = models.CharField(max_length=255, unique=True)
 
-    # FIXME: supp blank
     slug = AutoSlugField(
                             max_length=1024, 
                             populate_from=['name'], 
@@ -219,18 +275,21 @@ class ResourceType(BaseModel):
 
     description = models.CharField(max_length=255, null=True, blank=True)
 
-    provider = models.CharField(max_length=255, choices=constants.Provider.choices)
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
 
-    # TODO: active ou exclude
+    exclude_sync = models.BooleanField(default=False)
+
+    @property
+    def provider_name(self):
+        return self.provider.name
 
     def __str__(self):
-        return f"{self.provider} - {self.name}"
+        return f"{self.provider.name} - {self.name}"
 
 
 class Resource(BaseModel):
     """Generic Resource"""
 
-    # TODO: vmware ? construire ID sur même model que Azure
     resource_id = models.CharField(unique=True, max_length=1024)
 
     slug = AutoSlugField(max_length=1024, populate_from=['resource_id'], 
@@ -239,7 +298,7 @@ class Resource(BaseModel):
 
     name = models.CharField(max_length=255)
 
-    provider = models.CharField(max_length=255, choices=constants.Provider.choices)
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
 
     # TODO: limit choices same provider
     resource_type = models.ForeignKey(ResourceType, on_delete=models.PROTECT)
@@ -249,7 +308,7 @@ class Resource(BaseModel):
     # TODO: limit choices same provider
     tags = models.ManyToManyField(Tag)
 
-    metas = utils.JSONField(default={}, null=True, blank=True)
+    metas = encrypt(utils.JSONField(default={}, null=True, blank=True))
 
     changes = GenericRelation(ResourceEventChange, related_query_name='resource')
 
@@ -257,8 +316,20 @@ class Resource(BaseModel):
 
     active = models.BooleanField(default=True)
 
+    @property
+    def company_name(self):
+        return self.company.name
+
+    @property
+    def resource_type_name(self):
+        return self.resource_type.name
+
+    @property
+    def provider_name(self):
+        return self.provider.name
+
     def __str__(self):
-        return f"{self.name} ({self.resource_id})"
+        return f"{self.provider.name} - {self.resource_type_name} - {self.name}"
 
     def to_dict(self, fields=None, exclude=[]):
         exclude = exclude or []
@@ -268,11 +339,12 @@ class Resource(BaseModel):
         data = super().to_dict(fields=fields, exclude=exclude)
         data['resource_type'] = self.resource_type.name
         data['company'] = self.company.name
+        data['provider'] = str(self.provider.name)
 
         if self.metas:
             data['metas'] = dict(self.metas)
 
-        data["tags"] = [tag.to_dict(exclude=exclude) for tag in self.tags.all()]
+        data["tags"] = [tag.to_dict(fields=["name", "value", "provider"]) for tag in self.tags.all()]
 
         return data
 

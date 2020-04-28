@@ -3,8 +3,6 @@ import pytest
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 
-pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
-
 from mce_django_app import constants
 from mce_django_app.models import common as models
 
@@ -16,13 +14,13 @@ def test_tag_without_provider():
         value="myvalue",
     )
 
-def test_tag_without_provider():
+def test_tag_with_provider(mce_app_provider):
     """create simple tag with provider"""
 
     models.Tag.objects.create(
         name="mytag",
         value="myvalue",
-        provider=constants.Provider.AZURE
+        provider=mce_app_provider
     )
 
 def test_tag_error_if_exist_without_provider():
@@ -39,20 +37,20 @@ def test_tag_error_if_exist_without_provider():
             value="myvalue",
         )
 
-def test_tag_error_if_exist_with_provider():
+def test_tag_error_if_exist_with_provider(mce_app_provider):
     """check error if tag with provider exist"""
 
     models.Tag.objects.create(
         name="mytag",
         value="myvalue",
-        provider=constants.Provider.AZURE
+        provider=mce_app_provider
     )
 
     with pytest.raises(ValidationError) as excinfo:
         models.Tag.objects.create(
             name="mytag",
             value="myvalue",
-            provider=constants.Provider.AZURE
+            provider=mce_app_provider
         )
     assert excinfo.value.message_dict == {
         '__all__': ['Tag with this Provider, Name and Value already exists.'], 
@@ -92,18 +90,5 @@ def test_tag_error_null_and_blank_value():
     assert excinfo.value.message_dict == {
         'name': ['This field cannot be null.'], 
         'value': ['This field cannot be null.'], 
-    }
-
-def test_tag_error_provider_choice():
-    """test if provider not in choices"""
-
-    with pytest.raises(ValidationError) as excinfo:
-        models.Tag.objects.create(
-            name="xxxx",
-            value="yxxxx",
-            provider="BADCHOICE"
-        )
-    assert excinfo.value.message_dict == {
-        'provider': ["Value 'BADCHOICE' is not a valid choice."]
     }
 

@@ -8,8 +8,8 @@ from mce_django_app.models import azure as models
 
 CURRENT_MODEL = models.SubscriptionAzure
 
-def test_subscription_azure_success(mce_app_generic_account, mce_app_company):
-    """Create Azure Subscription"""
+def test_subscription_azure_success(mce_app_company, mce_app_provider_azure):
+    """Simple create"""
     
     subscription_id = str(uuid4())
     subscription_tenant = str(uuid4())
@@ -18,37 +18,106 @@ def test_subscription_azure_success(mce_app_generic_account, mce_app_company):
         subscription_id=subscription_id,
         name="sub1",
         company=mce_app_company,
+        provider=mce_app_provider_azure,
         tenant=subscription_tenant,
         location="francecentral",
-        account=mce_app_generic_account
+        username="user",
+        password="pass"
+        #account=mce_app_generic_account
     )
 
     assert subscription.is_china is False
     assert subscription.active is True
-
-    assert hasattr(mce_app_generic_account, 'mce_django_app_subscriptionazure_related') is True
-    
-    assert mce_app_generic_account.mce_django_app_subscriptionazure_related.first() == subscription
 
     auth = subscription.get_auth()
 
     assert auth == dict(
         subscription_id=subscription_id,
         tenant=subscription_tenant,
-        user=mce_app_generic_account.username,
-        password=mce_app_generic_account.password,
+        user="user",
+        password="pass",
         is_china=False
     )
 
-@pytest.mark.skip("TODO")
-def test_subscription_azure_error_duplicate():
-    """check error if subscription exist"""
+def test_error_duplicate(mce_app_company, mce_app_provider_azure):
+    """check error if duplicate"""
 
-@pytest.mark.skip("TODO")
-def test_subscription_azure_error_max_length():
+    subscription_id = str(uuid4())
+    subscription_tenant = str(uuid4())
+
+    CURRENT_MODEL.objects.create(
+        subscription_id=subscription_id,
+        name="sub1",
+        company=mce_app_company,
+        provider=mce_app_provider_azure,
+        tenant=subscription_tenant,
+        location="francecentral",
+    )
+
+    with pytest.raises(ValidationError) as excinfo:
+        CURRENT_MODEL.objects.create(
+            subscription_id=subscription_id,
+            name="sub1",
+            company=mce_app_company,
+            provider=mce_app_provider_azure,
+            tenant=subscription_tenant,
+            location="francecentral",
+        )
+    assert excinfo.value.message_dict == {
+        'subscription_id': ['Subscription azure with this Subscription id already exists.'],
+    }
+
+def test_error_max_length(mce_app_company, mce_app_provider_azure):
     """Test max_length on name and description"""
 
-@pytest.mark.skip("TODO")
-def test_subscription_azure_error_null_and_blank_value():
+    with pytest.raises(ValidationError) as excinfo:
+        CURRENT_MODEL.objects.create(
+            subscription_id="x" * 1025,
+            name="x" * 256,
+            tenant="x" * 256,
+            location="x" * 256,
+            username="x" * 256,
+            password="x" * 256,
+            company=mce_app_company,
+            provider=mce_app_provider_azure,
+        )
+    assert excinfo.value.message_dict == {
+        'subscription_id': ['Ensure this value has at most 1024 characters (it has 1025).'],
+        'name': ['Ensure this value has at most 255 characters (it has 256).'],
+        'tenant': ['Ensure this value has at most 255 characters (it has 256).'],
+        'location': ['Ensure this value has at most 255 characters (it has 256).'],
+        'username': ['Ensure this value has at most 255 characters (it has 256).'],
+        'password': ['Ensure this value has at most 255 characters (it has 256).'],
+    }
+
+def test_error_null_and_blank_value(mce_app_company, mce_app_provider_azure):
     """test null and blank value"""
+
+    with pytest.raises(ValidationError) as excinfo:
+        CURRENT_MODEL.objects.create(
+            subscription_id="",
+            name="",
+            tenant="",
+            location="",
+            company=mce_app_company,
+            provider=mce_app_provider_azure,
+        )
+
+    assert excinfo.value.message_dict == {
+        'subscription_id': ['This field cannot be blank.'],
+        'name': ['This field cannot be blank.'],
+        'tenant': ['This field cannot be blank.'],
+        'location': ['This field cannot be blank.'],
+    }
+
+    with pytest.raises(ValidationError) as excinfo:
+        CURRENT_MODEL.objects.create()
+    assert excinfo.value.message_dict == {
+        'subscription_id': ['This field cannot be blank.'],
+        'name': ['This field cannot be blank.'],
+        'tenant': ['This field cannot be blank.'],
+        'location': ['This field cannot be blank.'],
+        'company': ['This field cannot be null.'],
+        'provider': ['This field cannot be null.'],
+    }
 

@@ -7,41 +7,36 @@ from mce_django_app.models import azure as models
 
 CURRENT_MODEL = models.ResourceAzure
 
-def test_resource_azure_success(
+def test_resource_group_azure_success(
         mce_app_subscription_azure,
-        mce_app_resource_group_azure,
         mce_app_company,
         mce_app_provider_azure,
-        mce_app_resource_type_azure_vm):
+        mce_app_resource_type_azure_group):
     """Simple create"""
 
-    name = "vm1"
-    resource_id = f"/subscriptions/{mce_app_subscription_azure.subscription_id}/resourceGroups/{mce_app_resource_group_azure.name}/providers/{mce_app_resource_type_azure_vm.name}/{name}"
+    name = "rg1"
+    resource_id = f"/subscriptions/{mce_app_subscription_azure.subscription_id}/resourceGroups/{name}/providers/{mce_app_resource_type_azure_group.name}/{name}"
 
     resource = CURRENT_MODEL.objects.create(
         resource_id=resource_id,
         name=name,
         company=mce_app_company,
-        resource_type=mce_app_resource_type_azure_vm,
-        resource_group=mce_app_resource_group_azure,
+        resource_type=mce_app_resource_type_azure_group,
         subscription=mce_app_subscription_azure,
         provider=mce_app_provider_azure,
         location="francecentral",
     )
 
-    assert resource.slug == f"subscriptions-{mce_app_subscription_azure.subscription_id}-resourcegroups-rg1-providers-microsoft-classiccompute-virtualmachines-vm1"
-
-    assert ResourceEventChange.objects.count() == 2 # Resource Group + Resource
+    assert resource.slug == f"subscriptions-{mce_app_subscription_azure.subscription_id}-resourcegroups-rg1-providers-microsoft-resources-resourcegroups-rg1"
+    assert ResourceEventChange.objects.count() == 1
     events = [event.new_object["name"] for event in ResourceEventChange.objects.all()]
-    assert events == ["rg1", "vm1"]
+    assert events == ["rg1"]
 
-
-def test_resource_azure_error_with_null_or_blank(
+def test_resource_group_azure_error_with_null_or_blank(
         mce_app_subscription_azure,
-        mce_app_resource_group_azure,
         mce_app_company,
         mce_app_provider_azure,
-        mce_app_resource_type_azure_vm):
+        mce_app_resource_type_azure_group):
     """test error for null or blank values"""
 
     # TODO: test size sur  kind et location
@@ -51,7 +46,7 @@ def test_resource_azure_error_with_null_or_blank(
             resource_id=None,
             name=None,
             company=None,
-            resource_type=mce_app_resource_type_azure_vm,
+            resource_type=mce_app_resource_type_azure_group,
             provider=None,
             location=None,
             subscription=None,
@@ -64,7 +59,6 @@ def test_resource_azure_error_with_null_or_blank(
         'name': ['This field cannot be null.'],
         'company': ['This field cannot be null.'],
         'provider': ['This field cannot be null.'],
-        'resource_group': ['This field cannot be null.'],
         'location': ['This field cannot be null.'],
         'subscription': ['This field cannot be null.'],
     }
@@ -74,11 +68,10 @@ def test_resource_azure_error_with_null_or_blank(
             resource_id='',
             name='',
             company=mce_app_company,
-            resource_type=mce_app_resource_type_azure_vm,
+            resource_type=mce_app_resource_type_azure_group,
             provider=mce_app_provider_azure,
             location='',
             subscription=mce_app_subscription_azure,
-            resource_group=mce_app_resource_group_azure,
             kind='',
             sku={},
         )

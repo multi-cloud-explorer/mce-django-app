@@ -25,14 +25,13 @@ def html_active(obj):
 html_asset_task_state.short_description = _('State')
 """
 
-def resource_type_name(obj):
-    return obj.resource_type.name
-resource_type_name.short_description = _('Type de Resource')
-
-def company_name(obj):
-    return obj.company.name
-company_name.short_description = _('Société')
-
+# def resource_type_name(obj):
+#     return obj.resource_type.name
+# resource_type_name.short_description = _('Type de Resource')
+#
+# def company_name(obj):
+#     return obj.company.name
+# company_name.short_description = _('Société')
 
 class BaseModelAdmin(ModelAdmin):
     list_per_page = 25
@@ -75,12 +74,12 @@ class ResourceEventChangeAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
     readonly_fields = ['object_id', 'content_type', 'action', 'created']
 
 
-@admin.register(models.GenericAccount)
-class GenericAccountAdmin(BaseModelAdmin):
-    list_display = ('name', 'description', 'username', company_name)
-    search_fields = ['name']
-    list_select_related = ['company']
-
+# @admin.register(models.GenericAccount)
+# class GenericAccountAdmin(BaseModelAdmin):
+#     list_display = ('name', 'description', 'username', company_name)
+#     search_fields = ['name']
+#     list_select_related = ['company']
+#
 
 @admin.register(models.Company)
 class CompanyAdmin(BaseModelAdmin):
@@ -91,37 +90,37 @@ class CompanyAdmin(BaseModelAdmin):
 
 @admin.register(models.Tag)
 class TagAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
-    list_display = ('name', 'value', 'provider')
+    list_display = ('name', 'value', 'provider_name')
     search_fields = ['name']
     list_filter = ['provider']
     sortable_by = ['name', 'provider', 'value']
     # autocomplete_fields = ['provider']
-
+    list_select_related = ['provider']
 
 @admin.register(models.ResourceType)
 class ResourceTypeAdmin(BaseModelAdmin):
-    list_display = ('name', 'description', 'provider')
+    list_display = ('name', 'description', 'provider_name', 'exclude_sync')
     search_fields = ['name']
-    list_filter = ['provider']
+    list_filter = ['provider', 'exclude_sync']
     sortable_by = ['name', 'provider']
     # autocomplete_fields = ['provider']
     # formfield_overrides = {
     #    models.TextField: {'provider': Select2TagWidget},
     # }
-
+    list_select_related = ['provider']
 
 @admin.register(models.Resource)
 class ResourceAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
-    list_display = ('name', resource_type_name, 'provider', company_name, 'active', 'locked')
+    list_display = ('name', 'resource_type_name', 'provider_name', 'company_name', 'active', 'locked')
     search_fields = ['resource_id', 'name']
     list_filter = [
-        ('company_name', admin.RelatedOnlyFieldListFilter),
+        ('company', admin.RelatedOnlyFieldListFilter),
         #'provider', 
         ('active', admin.BooleanFieldListFilter), 
         #'locked'
     ]
     sortable_by = ['name', 'provider']
     autocomplete_fields = ['resource_type']  # , 'provider']
-    list_select_related = ['company', 'resource_type']
+    list_select_related = ['company', 'resource_type', 'provider']
     #list_editable = ['active', 'locked']
 

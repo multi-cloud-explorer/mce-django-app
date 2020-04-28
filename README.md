@@ -6,6 +6,7 @@
 [![codecov](https://codecov.io/gh/multi-cloud-explorer/mce-django-app/branch/master/graph/badge.svg)](https://codecov.io/gh/multi-cloud-explorer/mce-django-app)
 [![Code Health](https://landscape.io/github/multi-cloud-explorer/mce-django-app/master/landscape.svg?style=flat)](https://landscape.io/github/multi-cloud-explorer/mce-django-app/master)
 [![Requirements Status](https://requires.io/github/multi-cloud-explorer/mce-django-app/requirements.svg?branch=master)](https://requires.io/github/multi-cloud-explorer/mce-django-app/requirements/?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/multi-cloud-explorer/badge/?version=latest&style=flat-square)](https://multi-cloud-explorer.readthedocs.org)
 
 [Documentation](https://multi-cloud-explorer.readthedocs.org)
 

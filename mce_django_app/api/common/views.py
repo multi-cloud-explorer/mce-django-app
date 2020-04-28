@@ -15,12 +15,12 @@ class ResourceEventChangeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class GenericAccountViewSet(viewsets.ModelViewSet):
-
-    queryset = models.GenericAccount.objects.all()
-    serializer_class = serializers.GenericAccountSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
+# class GenericAccountViewSet(viewsets.ModelViewSet):
+#
+#     queryset = models.GenericAccount.objects.all()
+#     serializer_class = serializers.GenericAccountSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+#
 
 class CompanyiewSet(viewsets.ModelViewSet):
 

@@ -1,6 +1,9 @@
 import pytest
 
-pytest_plugins = "mce_django_app.pytest.plugin"
+pytest_plugins = [
+    "mce_django_app.pytest.plugin",
+    #"mce_lib_vsphere.pytest.plugin"
+]
 
 @pytest.fixture(autouse=True)
 def enable_db_access_for_all_tests(db):

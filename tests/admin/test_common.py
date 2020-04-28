@@ -1,4 +1,5 @@
 from django.urls import reverse
+from pprint import pprint
 
 def test_resource_type_admin_view(
     client, 
@@ -9,6 +10,10 @@ def test_resource_type_admin_view(
     response = client.get(url, follow=True)
     
     assert response.status_code == 200
+
+    pprint(response.context)
+
+    print('!!! object_list in context ?', 'object_list' in response.context)
 
     """
     TODO:

@@ -11,11 +11,11 @@ class SubscriptionAzureViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.SubscriptionAzureSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class ResourceGroupAzureViewSet(viewsets.ModelViewSet):
-
-    queryset = models.ResourceGroupAzure.objects.all().order_by('-created')
-    serializer_class = serializers.ResourceGroupAzureSerializer
-    permission_classes = [permissions.IsAuthenticated]
+# class ResourceGroupAzureViewSet(viewsets.ModelViewSet):
+#
+#     queryset = models.ResourceGroupAzure.objects.all().order_by('-created')
+#     serializer_class = serializers.ResourceGroupAzureSerializer
+#     permission_classes = [permissions.IsAuthenticated]
 
 class ResourceAzureViewSet(viewsets.ModelViewSet):
 

@@ -224,3 +224,5 @@ DJOSER = {
     "ACTIVATION_URL": "#/activate/{uid}/{token}",
     #"SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": ["http://test.localhost/"],
 }
+
+MCE_CHANGES_ENABLE = True

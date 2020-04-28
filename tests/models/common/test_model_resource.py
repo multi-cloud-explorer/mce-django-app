@@ -1,17 +1,17 @@
 import pytest
+from pprint import pprint
+from datetime import datetime
+from dateutil.tz import UTC
 
 from django.core.exceptions import ValidationError
 from freezegun import freeze_time
-
-pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
 from mce_django_app.models import common as models
 
 @freeze_time("2019-01-01")
 def test_resource_success(
-    mce_app_resource_type, 
-    mce_app_company,
-    mce_app_tags_five):
+        mce_app_resource_type_azure,
+        mce_app_company):
 
     assert models.Resource.objects.count() == 0
 
@@ -19,17 +19,16 @@ def test_resource_success(
         resource_id="x1",
         name="myname",
         company=mce_app_company,
-        resource_type=mce_app_resource_type,
-        provider=mce_app_resource_type.provider
+        resource_type=mce_app_resource_type_azure,
+        provider=mce_app_resource_type_azure.provider,
+        metas={}
     )
 
     assert resource.slug == "x1"
 
-    resource.tags.set(mce_app_tags_five)
+    assert str(resource) == "azure - microsoft.classiccompute/virtualmachines - myname"
 
-    assert str(resource) == "myname (x1)"
-
-    assert resource.tags.count() == 5
+    assert resource.tags.count() == 0
     assert resource.active is True
     assert resource.metas == {}
     #assert resource.deleted is False
@@ -49,6 +48,92 @@ def test_resource_success(
     assert models.Resource.objects.count() == 0
 
     #assert models.Resource.all_objects.count() == 1
+
+
+@freeze_time("2019-01-01")
+def test_resource_to_dict(
+        mce_app_resource_type,
+        mce_app_company,
+        mce_app_tag,
+        mce_app_tag_with_provider):
+
+    resource = models.Resource.objects.create(
+        resource_id="x1",
+        name="myname",
+        company=mce_app_company,
+        resource_type=mce_app_resource_type,
+        provider=mce_app_resource_type.provider,
+        metas=dict(key1=1, key2="deux")
+    )
+    resource.tags.set([mce_app_tag, mce_app_tag_with_provider])
+
+    pprint(resource.to_dict())
+    assert resource.to_dict()['metas'] == dict(key1=1, key2="deux")
+    assert isinstance(resource.to_dict()['metas'], dict) is True
+    assert type(resource.to_dict()['metas']) == dict
+
+    old_obj = resource.to_dict()
+    assert old_obj == {
+        'id': 1,
+        'resource_id': 'x1',
+        'slug': 'x1',
+        'name': 'myname',
+        'company': 'my-company',
+        'provider': "azure",
+        'resource_type': 'aws.ec2.instance',
+        'tags': [
+            {"name": "ms-resource-usage", "value": "azure-cloud-shell", "provider": None},
+            {"name": "key1", "value": "value1", "provider": "azure"},
+        ],
+        'metas': {'key1': 1, 'key2': 'deux'},
+        'active': True,
+        'locked': False,
+        'created': datetime(2019, 1, 1, 0, 0, tzinfo=UTC),
+        'updated': None
+    }
+    assert type(old_obj['provider']) == str
+
+    obj, _ = models.Resource.objects.update_or_create(
+        resource_id="x1",
+        defaults=dict(
+            name="myname",
+            company=mce_app_company,
+            resource_type=mce_app_resource_type,
+            provider=mce_app_resource_type.provider,
+            metas=dict(key1=2, key2="deux", key3="trois")
+        )
+    )
+
+    pprint(obj.to_dict())
+    assert obj.to_dict()['metas'] == dict(key1=2, key2="deux", key3="trois")
+    assert isinstance(obj.to_dict()['metas'], dict) is True
+    assert type(obj.to_dict()['metas']) == dict
+
+    assert obj.to_dict() == {
+        'id': 1,
+        'resource_id': 'x1',
+        'slug': 'x1',
+        'name': 'myname',
+        'company': 'my-company',
+        'provider': "azure",
+        'resource_type': 'aws.ec2.instance',
+        'tags': [
+            {"name": "ms-resource-usage", "value": "azure-cloud-shell", "provider": None},
+            {"name": "key1", "value": "value1", "provider": "azure"},
+        ],
+        'metas': {'key1': 2, 'key2': 'deux', 'key3': 'trois'},
+        'active': True,
+        'locked': False,
+        'created': datetime(2019, 1, 1, 0, 0, tzinfo=UTC),
+        'updated': datetime(2019, 1, 1, 0, 0, tzinfo=UTC)
+    }
+
+"""
+        data["tags"] = [tag.to_dict(exclude=exclude) for tag in self.tags.all()]
+
+"""
+
+
 
 def test_resource_error_duplicate(mce_app_resource_type, mce_app_company):
 
@@ -97,12 +182,11 @@ def test_resource_error_null_and_blank_value(mce_app_resource_type, mce_app_comp
             name='',
             company=mce_app_company,
             resource_type=mce_app_resource_type,
-            provider=''
+            provider=mce_app_resource_type.provider
         )
     assert excinfo.value.message_dict == {
         'resource_id': ['This field cannot be blank.'], 
         'name': ['This field cannot be blank.'], 
-        'provider': ['This field cannot be blank.'], 
     }
 
 def test_resource_error_max_length(mce_app_resource_type, mce_app_company):

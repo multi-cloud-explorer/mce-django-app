@@ -5,7 +5,7 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register(r'resource-event-change', views.ResourceEventChangeViewSet)
-router.register(r'generic-account', views.GenericAccountViewSet)
+#router.register(r'generic-account', views.GenericAccountViewSet)
 router.register(r'company', views.CompanyiewSet)
 router.register(r'tag', views.TagViewSet)
 router.register(r'resource-type', views.ResourceTypeViewSet)

@@ -1,10 +1,10 @@
+import json
 import pytest
 from django.core.exceptions import ValidationError
 import jsonpatch
 
+from django.core.serializers.json import DjangoJSONEncoder
 from freezegun import freeze_time
-
-pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
 from mce_django_app import constants
 from mce_django_app.models import common as models
@@ -12,7 +12,7 @@ from mce_django_app.models import common as models
 def test_resource_event_change_create(mce_app_resource):
     """CREATE Event for Resource"""
 
-    models.ResourceEventChange.objects.create(
+    change = models.ResourceEventChange.objects.create(
         action=constants.EventChangeType.CREATE,
         content_object=mce_app_resource,
         new_object=mce_app_resource.to_dict(exclude=['created', 'updated']),
@@ -20,8 +20,12 @@ def test_resource_event_change_create(mce_app_resource):
 
     assert mce_app_resource.changes.count() == 1
 
+    #data = change.to_dict(exclude=["content_object", "object_id", "updated", ])#"content_type"])
+    #print(json.dumps(data, cls=DjangoJSONEncoder, indent=4))
+
     #qs = models.ResourceEventChange.objects.filter(action=constants.EventChangeType.CREATE)
 
+@freeze_time("2019-01-01")
 def test_resource_event_change_update(mce_app_resource):
     """UPDATE Event for Resource"""
 
@@ -43,7 +47,7 @@ def test_resource_event_change_update(mce_app_resource):
         'value': 'new-myname'
     }]
     
-    models.ResourceEventChange.objects.create(
+    change = models.ResourceEventChange.objects.create(
         action=constants.EventChangeType.UPDATE,
         content_object=new_resource,
         changes=list(patch),
@@ -54,10 +58,14 @@ def test_resource_event_change_update(mce_app_resource):
 
     assert mce_app_resource.changes.count() == 1
 
+    #data = change.to_dict(exclude=["content_object", "object_id", "updated", ])#"content_type"])
+    #print(json.dumps(data, cls=DjangoJSONEncoder, indent=4))
+
+@freeze_time("2019-01-01")
 def test_resource_event_change_delete(mce_app_resource):
     """DELETE Event for Resource"""
 
-    models.ResourceEventChange.objects.create(
+    change = models.ResourceEventChange.objects.create(
         action=constants.EventChangeType.DELETE,
         content_object=mce_app_resource,
         old_object=mce_app_resource.to_dict(exclude=['created', 'updated']),
@@ -65,6 +73,10 @@ def test_resource_event_change_delete(mce_app_resource):
 
     assert mce_app_resource.changes.count() == 1
 
+    #data = change.to_dict(exclude=["content_object", "object_id", "updated", ])#"content_type"])
+    #print(json.dumps(data, cls=DjangoJSONEncoder, indent=4))
+
+@freeze_time("2019-01-01")
 def test_resource_event_change_create_and_delete(mce_app_resource):
     """CREATE and DELETE Events for Resource"""
 

@@ -6,5 +6,5 @@ class MceAppConfig(AppConfig):
     verbose_name = "Multi Cloud Explorer Application"
 
     # def ready(self):
-    #    print('!!! App ready')
+    #   print('!!! App ready')
     #    #from django_q.signals import call_hook

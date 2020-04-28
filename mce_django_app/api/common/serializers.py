@@ -16,11 +16,11 @@ class ResourceEventChangeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class GenericAccountSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.GenericAccount
-        fields = '__all__'
+# class GenericAccountSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = models.GenericAccount
+#         fields = '__all__'
 
 
 class TagSerializer(serializers.ModelSerializer):
