@@ -1,7 +1,7 @@
 import os
 from setuptools import setup, find_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
+import versioneer
 
 install_requires = [
     'Django>=3.0',
@@ -11,6 +11,7 @@ install_requires = [
     'python-slugify',
     'furl',
     'djangorestframework',
+    'django-daterangefilter',
 
     'django-dynamic-fixture>=3.1.0', # for mce_django_app.pytest.plugin
     'pytest>=5.4.1',          # for mce_django_app.pytest.plugin
@@ -51,26 +52,40 @@ dev_requires = [
     'autopep8',
     'black',
     'wheel',
+    'pipdeptree',
+    'django-debug-toolbar',
+    'pygraphviz',
+    'pydotplus',
+]
+
+ci_requires = [
+    'coveralls',
+    'codecov',
 ]
 
 extras_requires = {
     'tests': tests_requires,
     'dev': dev_requires,
+    'ci': ci_requires
 }
+
+here = os.path.abspath(os.path.dirname(__file__))
 
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name='mce-django-app',
-    version="0.1.0",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description='Django App for Multi Cloud Explorer',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/multi-cloud-explorer/mce-django-app.git',
     license='GPLv3+',
     packages=find_packages(exclude=("tests",)),
-    include_package_data=False, 
+    include_package_data=True, 
+    setup_requires=["pytest-runner"],
     tests_require=tests_requires,
     install_requires=install_requires,
     extras_require=extras_requires,

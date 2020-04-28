@@ -1,0 +1,2 @@
+include versioneer.py
+include mce_django_app/_version.py
