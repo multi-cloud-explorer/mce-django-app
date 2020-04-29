@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from django_extensions.db.fields import AutoSlugField
 from django_cryptography.fields import encrypt
+from jsonfield import JSONField
 
 from mce_django_app import utils
 from mce_django_app import constants
@@ -97,11 +98,11 @@ class ResourceEventChange(BaseModel):
 
     action = models.CharField(max_length=10, choices=constants.EventChangeType.choices)
 
-    changes = utils.JSONField(default=[], null=True, blank=True)
+    changes = JSONField(default=[], null=True, blank=True)
 
-    old_object = utils.JSONField(default={}, null=True, blank=True)
+    old_object = JSONField(default={}, null=True, blank=True)
 
-    new_object = utils.JSONField(default={}, null=True, blank=True)
+    new_object = JSONField(default={}, null=True, blank=True)
 
     diff = models.TextField(null=True, blank=True)
 
@@ -126,18 +127,21 @@ class ResourceEventChange(BaseModel):
         }
         return data
 
-    def to_json(self, fields=None, exclude=None):
-        from django.core import serializers
-        data = self.to_dict(fields=fields, exclude=exclude)
-        #json.dumps(data, cls=DjangoJSONEncoder, indent=4)
+    # def to_json(self, fields=None, exclude=None):
+    #     #from django.core import serializers
+    #     data = self.to_dict(fields=fields, exclude=exclude)
+    #     #json.dumps(data, cls=DjangoJSONEncoder, indent=4)
 
     @classmethod
     def create_event_change_update(cls, old_obj, new_obj, resource):
-        """UPDATE Event for Resource"""
+        """UPDATE Event for Resource
+
+        TODO: déplacer sous forme de signal en 2 phase: pre_save et post_save
+        - pre_save, remplit tout sauf new_object, changes et diff
+        - post_save, remplit le reste
+        """
 
         patch = jsonpatch.JsonPatch.from_diff(old_obj, new_obj)
-
-        from pprint import pprint
 
         if patch.patch:
             # msg = f"create event change update for {old_obj['resource_id']}"
@@ -195,7 +199,7 @@ class ResourceEventChange(BaseModel):
 #     # TODO: null=True pour compte hors Company ?
 #     company = models.ForeignKey(Company, on_delete=models.CASCADE)
 #
-#     settings = encrypt(utils.JSONField(default={}, null=True, blank=True))
+#     settings = encrypt(JSONField(default={}, null=True, blank=True))
 #
 #     @classmethod
 #     def parse_url(cls, url):
@@ -225,25 +229,38 @@ class Tag(BaseModel):
 
     provider = models.ForeignKey(Provider, on_delete=models.PROTECT, null=True, blank=True)
 
+    company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
+
     @property
     def provider_name(self):
         return self.provider.name
 
+    @property
+    def company_name(self):
+        return self.company.name
+
     def to_dict(self, fields=None, exclude=[]):
         data = super().to_dict(fields=fields, exclude=exclude)
+
         if self.provider:
             data["provider"] = self.provider.name
+
+        if self.company:
+            data["company"] = self.company.name
+
         return data
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["provider", "name", "value"], name='provider_name_value_uniq'
+                fields=["company", "provider", "name", "value"],
+                name='provider_name_value_uniq',
+                condition=models.Q(provider__isnull=False, company__isnull=False),
             ),
             models.UniqueConstraint(
                 fields=['name', 'value'],
-                name='name_value_without_provider_uniq',
-                condition=models.Q(provider__isnull=True),
+                name='not_company_not_provider_uniq',
+                condition=models.Q(provider__isnull=True, company__isnull=True),
             ),
         ]
 
@@ -347,7 +364,7 @@ class Resource(BaseModel):
     # TODO: limit choices same provider
     tags = models.ManyToManyField(Tag)
 
-    metas = encrypt(utils.JSONField(default={}, null=True, blank=True))
+    metas = encrypt(JSONField(default={}, null=True, blank=True))
 
     changes = GenericRelation(ResourceEventChange, related_query_name='resource')
 

@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 
 from django_cryptography.fields import encrypt
+from jsonfield import JSONField
 
 from mce_django_app import utils
 from mce_django_app import constants
@@ -99,7 +100,7 @@ class ResourceAzure(Resource):
         if errors:
             raise ValidationError(errors)
 
-    sku = utils.JSONField(default={}, null=True, blank=True)
+    sku = JSONField(default={}, null=True, blank=True)
 
     def to_dict(self, fields=None, exclude=None):
         data = super().to_dict(fields=fields, exclude=exclude)

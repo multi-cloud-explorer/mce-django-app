@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from django.conf import settings
 
 from django_cryptography.fields import encrypt
+from jsonfield import JSONField
 
 from mce_django_app import utils
 from mce_django_app import constants

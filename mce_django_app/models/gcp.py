@@ -4,13 +4,14 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.conf import settings
 
+from django_cryptography.fields import encrypt
+from jsonfield import JSONField
+
 from mce_django_app import utils
 from mce_django_app import constants
 from mce_django_app import signals
 
 from mce_django_app.models.common import BaseModel, Resource, BaseSubscription
-
-from django_cryptography.fields import encrypt
 
 class ProjectGCP(BaseModel):
     """GCP Project Model"""
@@ -26,7 +27,7 @@ class ProjectGCP(BaseModel):
 
     project_id = models.CharField(max_length=255, verbose_name=_("Project ID"))
 
-    credentials = encrypt(utils.JSONField(default={}, null=True, blank=True))
+    credentials = encrypt(JSONField(default={}, null=True, blank=True))
 
     username = models.CharField(max_length=255, verbose_name=_("Username or Client ID"), null=True, blank=True)
 

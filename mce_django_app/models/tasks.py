@@ -3,6 +3,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+from jsonfield import JSONField
+
 from mce_django_app import constants
 from mce_django_app import utils
 from mce_django_app.models.common import BaseModel
@@ -39,7 +41,7 @@ class TaskResult(BaseModel):
                             _("Trace error"), 
                             null=True)
 
-    output = utils.JSONField(
+    output = JSONField(
                             default={},
                             verbose_name=_("Sortie"),
                             blank=True, null=True)

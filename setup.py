@@ -13,6 +13,7 @@ install_requires = [
     'jsonpatch>=1.25,<2',
     'djangorestframework',
     'django-daterangefilter',
+    'jsonfield',
 
     'django-dynamic-fixture>=3.1.0', # for mce_django_app.pytest.plugin
     'pytest>=5.4.1',          # for mce_django_app.pytest.plugin
@@ -87,7 +88,6 @@ setup(
     license='GPLv3+',
     packages=find_packages(exclude=("tests",)),
     include_package_data=True, 
-    setup_requires=["pytest-runner"],
     tests_require=tests_requires,
     install_requires=install_requires,
     extras_require=extras_requires,
