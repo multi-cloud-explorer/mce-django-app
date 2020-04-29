@@ -6,8 +6,8 @@ from django.core.exceptions import ValidationError
 from mce_django_app import constants
 from mce_django_app.models import common as models
 
-def test_tag_without_provider():
-    """create simple tag without provider"""
+def test_tag_without_provider_and_company():
+    """create simple tag without provider and company"""
 
     models.Tag.objects.create(
         name="mytag",
