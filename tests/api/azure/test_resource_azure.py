@@ -1,3 +1,4 @@
+from pprint import pprint as pp
 from rest_framework.reverse import reverse
 
 def test_resource_azure_detail(client, mce_app_resource_azure, mce_app_user_with_company):
@@ -10,8 +11,9 @@ def test_resource_azure_detail(client, mce_app_resource_azure, mce_app_user_with
 
     assert response.status_code == 200
 
-    from pprint import pprint as pp
-    #pp(response.json())
+    pp(mce_app_resource_azure.to_dict())
+
+    pp(response.json())
     #pp(sorted(list(response.json().keys())))
     assert sorted(list(response.json().keys())) == sorted(
         [
@@ -22,10 +24,12 @@ def test_resource_azure_detail(client, mce_app_resource_azure, mce_app_user_with
             "resource_id",
             "slug",
             "kind",
-            "location",
+            "region",
             "locked",
+            "managed_by",
             "metas",
             "name",
+            "plan",
             "provider",
             "resource_group",
             "resource_type",

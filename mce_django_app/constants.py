@@ -1,7 +1,12 @@
 from django.db import models
 
-class Provider(models.TextChoices):
+class InventoryMode(models.TextChoices):
+    PULL            = "pull"    # déclencher par MCE server ou worker, se connecte aux souscriptions et pull les datas
+    PUSH            = "push"    # worker coté souscription, push data par api rest
+    EVENT           = "event"   # event grid et function api push resource par resource
+    QUEUE           = "queue"   # prendre dans une queue (SQS, Autres)
 
+class Provider(models.TextChoices):
     AWS             = "aws"
     AZURE           = "azure"
     GCP             = "gcp"

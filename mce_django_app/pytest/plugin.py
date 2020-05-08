@@ -1,23 +1,32 @@
+"""
+Add to test/conftest.py module:
+pytest_plugins = "mce_django_app.pytest.plugin"
+"""
+
 from uuid import uuid4
 import pytest
 from ddf import G, M
 from freezegun import freeze_time
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from guardian.shortcuts import assign_perm
 
 pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
 from mce_django_app import constants
 from mce_django_app.models import common
 from mce_django_app.models import azure
-from mce_django_app.models import aws
-from mce_django_app.models import account
-from mce_django_app.models import gcp
 from mce_django_app.models import vsphere
+from mce_django_app.models import aws
+#from mce_django_app.models import gcp
 
 """
 Microsoft.Resources/resourceGroups
 Microsoft.ClassicCompute/virtualMachines
 Microsoft.Sql/servers/databases
 """
+
+USER_MODEL = get_user_model()
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "mce_known_bug: mark test as known bug")
@@ -53,24 +62,107 @@ def mce_app_provider_vmware():
         name=constants.Provider.VMWARE
     )
 
+@pytest.fixture
+def mce_app_provider_all(
+        mce_app_provider_azure,
+        mce_app_provider_vmware,
+        mce_app_provider_aws,
+        mce_app_provider_gcp
+    ):
+    return [
+        mce_app_provider_azure,
+        mce_app_provider_vmware,
+        mce_app_provider_aws,
+        mce_app_provider_gcp
+    ]
+
+# --- common: Region
+
+@pytest.fixture
+def mce_app_region(mce_app_provider):
+    return common.Region.objects.create(
+        name="us-east-1",
+        display_name="US East 1",
+        provider=mce_app_provider
+    )
+
+@pytest.fixture
+def mce_app_region_aws(mce_app_region):
+    return mce_app_region
+
+@pytest.fixture
+def mce_app_region_azure(mce_app_provider_azure):
+    return common.Region.objects.create(
+        name="centralus",
+        display_name="Central US",
+        provider=mce_app_provider_azure
+    )
+
+# --- django.contrib.auth : Group
+
+@pytest.fixture
+def mce_app_company_group_admins():
+    return Group.objects.create(name="my_company_Admins")
+
+@pytest.fixture
+def mce_app_company_group_users():
+    return Group.objects.create(name="my_company_Users")
+
 # --- common : Company
 
 @pytest.fixture
-def mce_app_company():
-    return G(common.Company, name="my-company")
+def mce_app_company(
+        mce_app_company_group_admins,
+        mce_app_company_group_users,
+        mce_app_provider_all,
+        mce_app_region,
+    ):
 
+    obj = common.Company.objects.create(
+        name="my-company",
+        owner_group=mce_app_company_group_admins,
+        user_group=mce_app_company_group_users
+    )
+    obj.providers.set(mce_app_provider_all)
+    obj.regions.add(mce_app_region)
+
+    return obj
 
 # --- account : User
 
 @pytest.fixture
 def mce_app_user_with_company(mce_app_company):
     # Token
-    return account.User.objects.create(username="user1", email="user2@localhost.net", company=mce_app_company)
+    return USER_MODEL.objects.create(
+        username="user1",
+        email="user1@localhost.net",
+        company=mce_app_company
+    )
+
+@pytest.fixture
+def mce_app_user_admins(mce_app_company, mce_app_company_group_admins):
+    obj = USER_MODEL.objects.create(
+        username="company_admin_1",
+        email="company_admin_1@localhost.net",
+        company=mce_app_company
+    )
+    obj.groups.add(mce_app_company_group_admins)
+    return obj
+
+@pytest.fixture
+def mce_app_user_users(mce_app_company, mce_app_company_group_users):
+    obj = USER_MODEL.objects.create(
+        username="company_user_2",
+        email="company_user_2@localhost.net",
+        company=mce_app_company
+    )
+    obj.groups.add(mce_app_company_group_users)
+    return obj
 
 @pytest.fixture
 def mce_app_user_without_company():
     # Token
-    return account.User.objects.create(username="user2", email="user2@localhost.net")
+    return USER_MODEL.objects.create(username="user2", email="user2@localhost.net")
 
 
 # --- common : ResourceType
@@ -126,26 +218,13 @@ def mce_app_resource_type_vsphere_vm(mce_app_provider_vmware):
 # --- common : Tag
 
 @pytest.fixture
-def mce_app_tag():
+def mce_app_tag(mce_app_company, mce_app_provider):
     return common.Tag.objects.create(
+        company=mce_app_company,
+        provider=mce_app_provider,
         name="ms-resource-usage",
         value="azure-cloud-shell"
     )
-
-@pytest.fixture
-def mce_app_tag_with_provider(mce_app_provider):
-    return common.Tag.objects.create(
-        name="key1",
-        value="value1",
-        provider=mce_app_provider
-    )
-
-
-# --- common : GenericAccount
-
-# @pytest.fixture
-# def mce_app_generic_account(mce_app_company):
-#     return G(common.GenericAccount, company=mce_app_company)
 
 
 # --- common : Resource
@@ -220,7 +299,6 @@ def mce_app_subscription_aws(mce_app_provider_aws, mce_app_company):
         company=mce_app_company,
         provider=mce_app_provider_aws,
         tenant=str(uuid4()),
-        location="francecentral",
     )
 
 
@@ -235,11 +313,14 @@ def mce_app_subscription_azure(mce_app_provider_azure, mce_app_company):
         company=mce_app_company,
         provider=mce_app_provider_azure,
         tenant=str(uuid4()),
-        location="francecentral",
     )
 
 @pytest.fixture
-def mce_app_resource_group_azure(mce_app_company, mce_app_subscription_azure, mce_app_resource_type_azure_group):
+def mce_app_resource_group_azure(
+    mce_app_company,
+    mce_app_subscription_azure,
+    mce_app_resource_type_azure_group,
+    mce_app_region_azure):
     """Return 1 Azure Resource Group with ResourceGroup Type"""
 
     name = "rg1"
@@ -252,14 +333,15 @@ def mce_app_resource_group_azure(mce_app_company, mce_app_subscription_azure, mc
         company=mce_app_company,
         subscription=mce_app_subscription_azure,
         provider=mce_app_resource_type_azure_group.provider,
-        location="francecentral",
+        region=mce_app_region_azure,
     )
 
 
 @pytest.fixture
 def mce_app_resource_azure(
     mce_app_company, 
-    mce_app_subscription_azure, 
+    mce_app_subscription_azure,
+    mce_app_region_azure,
     mce_app_resource_group_azure, 
     mce_app_resource_type_azure, 
     mce_app_tag):
@@ -275,8 +357,7 @@ def mce_app_resource_azure(
         resource_group=mce_app_resource_group_azure,
         subscription=mce_app_subscription_azure,
         provider=mce_app_resource_type_azure.provider,
-        location="francecentral",
-        
+        region=mce_app_region_azure,
     )
     resource.tags.add(mce_app_tag)
     return resource

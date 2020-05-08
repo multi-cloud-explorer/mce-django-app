@@ -27,9 +27,9 @@ from mce_django_app.admin.common import BaseModelAdmin, ReadOnlyModelAdminMixIn
 
 @admin.register(models.SubscriptionAzure)
 class SubscriptionAzureAdmin(BaseModelAdmin):
-    list_display = ('subscription_id', 'name', 'company_name', 'location', 'tenant')
+    list_display = ('subscription_id', 'name', 'company_name', 'tenant')
     search_fields = ['subscription_id', 'name']
-    list_filter = ['company__name', 'location', 'tenant']
+    list_filter = ['company__name', 'tenant']
     #sortable_by = ['name', 'location', 'tenant']
     #autocomplete_fields = ['account']
     list_select_related = ['company']
@@ -57,18 +57,28 @@ class ResourceAzureAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
         'resource_type_name', # TODO: faire lien html vers le type
         'resource_group_name',
         'company_name',
-        'tenant',
+        #'tenant',
         'subscription_name',
-        'location',
+        'region_name',
     )
-    search_fields = ['resource_id', 'name']
+    search_fields = ['resource_id', 'name', 'resource_type__name']
+
     list_filter = [
         'company__name',
-        'location', 
+        'region__name',
         'subscription__name', 
-        'subscription__subscription_id', 
-        'resource_group__name'
+        'subscription__tenant',
+        'subscription__subscription_id',
+        #'resource_type__name',
+        #'resource_group__name'
     ]
-    list_select_related = ['resource_type', 'company', 'resource_group', 'subscription']
+
+    list_select_related = [
+        'resource_type',
+        'company',
+        'resource_group',
+        'subscription',
+        'region'
+    ]
 
 

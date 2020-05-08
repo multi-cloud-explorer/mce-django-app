@@ -1,5 +1,6 @@
 from rest_framework import viewsets
-from rest_framework import permissions
+from rest_framework import authentication, generics, permissions, serializers, status
+from rest_framework_guardian.filters import (DjangoObjectPermissionsFilter, ObjectPermissionsFilter)
 
 from mce_django_app.models import common as models
 
@@ -27,7 +28,7 @@ class CompanyiewSet(viewsets.ModelViewSet):
     queryset = models.Company.objects.all()
     serializer_class = serializers.CompanySerializer
     permission_classes = [permissions.IsAuthenticated]
-
+    # TODO: filter_backends = [ObjectPermissionsFilter]
 
 class TagViewSet(viewsets.ModelViewSet):
 

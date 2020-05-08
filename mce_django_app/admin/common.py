@@ -3,6 +3,7 @@ from django.contrib.admin import ModelAdmin
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
+from guardian.admin import GuardedModelAdmin
 from daterangefilter.filters import PastDateRangeFilter
 
 from mce_django_app.models import common as models
@@ -33,11 +34,11 @@ html_asset_task_state.short_description = _('State')
 #     return obj.company.name
 # company_name.short_description = _('Société')
 
-class BaseModelAdmin(ModelAdmin):
+class BaseModelAdmin(GuardedModelAdmin):
     list_per_page = 25
     list_max_show_all = 100
     save_on_top = True
-    view_on_site = True
+    view_on_site = False
     #actions_on_top = True
     #actions_on_bottom = True
     show_full_result_count = False # perfs
@@ -83,16 +84,32 @@ class ResourceEventChangeAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
 
 @admin.register(models.Company)
 class CompanyAdmin(BaseModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'created', 'updated']
     search_fields = ['name']
     sortable_by = ['name']
+    readonly_fields = ['name', 'owner_group', 'user_group']
+    #list_select_related = ['providers', 'regions', 'zones', 'resource_types'] #,
+    list_select_related = ['owner_group', 'user_group']
 
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'inventory_mode') #, 'created', 'updated')
+        }),
+        ('Limiters', {
+            'classes': ('collapse',),
+            'fields': ('providers', 'regions', 'zones', 'resource_types'),
+        }),
+        ('Security', {
+            'classes': ('collapse',),
+            'fields': ('owner_group', 'user_group'),
+        }),
+    )
 
 @admin.register(models.Tag)
 class TagAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
     list_display = ('name', 'value', 'provider_name')
     search_fields = ['name']
-    list_filter = ['provider']
+    list_filter = ['provider', 'name']
     sortable_by = ['name', 'provider', 'value']
     # autocomplete_fields = ['provider']
     list_select_related = ['provider']
@@ -110,7 +127,7 @@ class ResourceTypeAdmin(BaseModelAdmin):
     list_select_related = ['provider']
 
 @admin.register(models.Resource)
-class ResourceAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
+class ResourceAdmin(BaseModelAdmin):
     list_display = ('name', 'resource_type_name', 'provider_name', 'company_name', 'active', 'locked')
     search_fields = ['resource_id', 'name']
     list_filter = [

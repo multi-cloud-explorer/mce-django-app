@@ -44,8 +44,8 @@ def test_error_duplicate(mce_app_company):
         )
 
     assert excinfo.value.message_dict == {
-        'name': ['Vcenter with this Name already exists.'],
-        'url': ['Vcenter with this Url already exists.']
+        'name': ['VMware Vcenter with this Name already exists.'],
+        'url': ['VMware Vcenter with this Url already exists.']
     }
 
 def test_error_max_length(mce_app_company):

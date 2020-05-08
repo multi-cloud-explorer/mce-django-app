@@ -42,7 +42,20 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
 
-    'mce_django_app',
+    'guardian',
+    'formtools',
+    'taggit',
+    'mptt',
+    #'organizations',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    #'allauth.socialaccount.providers.github',
+    'allauth.socialaccount.providers.google',
+
+    #'mce_django_app',
+    "mce_django_app.apps.MceAppConfig",
 ]
 
 MIDDLEWARE = [
@@ -102,12 +115,14 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'mce_django_app.User'
 
-LOGIN_URL = 'admin:login'
+#LOGIN_URL = 'admin:login'
 #LOGIN_URL = '/accounts/login/'
 #LOGIN_REDIRECT_URL = '/'
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
+    "allauth.account.auth_backends.AuthenticationBackend",
+    'guardian.backends.ObjectPermissionBackend',
 )
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -116,6 +131,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        # 'OPTIONS': {
+        #     'min_length': 9,
+        # }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -129,11 +147,11 @@ AUTH_PASSWORD_VALIDATORS = [
 LOCALE_PATHS = ( os.path.join(BASE_DIR, 'locale'), )
 
 LANGUAGES = [
-  ('fr', _('Français')),
-  ('en', _('Anglais')),
+  ('en', _('English')),
+  ('fr', _('French')),
 ]
 
-LANGUAGE_CODE = 'fr'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'UTC'
 
@@ -225,4 +243,15 @@ DJOSER = {
     #"SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": ["http://test.localhost/"],
 }
 
-MCE_CHANGES_ENABLE = True
+
+TAGGIT_CASE_INSENSITIVE = True
+
+MCE_CHANGES_ENABLE = False
+
+# SOCIALACCOUNT_PROVIDERS = {
+#     'google': {
+#         'EDX_URL': "https://draft.navoica.pl",
+#     }
+# }
+
+#ORGS_SLUGFIELD = 'django_extensions.db.fields.AutoSlugField'

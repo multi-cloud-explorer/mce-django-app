@@ -54,8 +54,7 @@ def test_resource_success(
 def test_resource_to_dict(
         mce_app_resource_type,
         mce_app_company,
-        mce_app_tag,
-        mce_app_tag_with_provider):
+        mce_app_tag):
 
     resource = models.Resource.objects.create(
         resource_id="x1",
@@ -65,14 +64,16 @@ def test_resource_to_dict(
         provider=mce_app_resource_type.provider,
         metas=dict(key1=1, key2="deux")
     )
-    resource.tags.set([mce_app_tag, mce_app_tag_with_provider])
+    resource.tags.set([mce_app_tag])
 
-    pprint(resource.to_dict())
+    #pprint(resource.to_dict())
     assert resource.to_dict()['metas'] == dict(key1=1, key2="deux")
     assert isinstance(resource.to_dict()['metas'], dict) is True
     assert type(resource.to_dict()['metas']) == dict
 
     old_obj = resource.to_dict()
+    del old_obj['created']
+
     assert old_obj == {
         'id': 1,
         'resource_id': 'x1',
@@ -82,13 +83,13 @@ def test_resource_to_dict(
         'provider': "azure",
         'resource_type': 'aws.ec2.instance',
         'tags': [
-            {"name": "ms-resource-usage", "value": "azure-cloud-shell", "provider": None},
-            {"name": "key1", "value": "value1", "provider": "azure"},
+            {"name": "ms-resource-usage", "value": "azure-cloud-shell", "provider": "azure", "company": "my-company"},
         ],
         'metas': {'key1': 1, 'key2': 'deux'},
         'active': True,
+        #'categories': [],
         'locked': False,
-        'created': datetime(2019, 1, 1, 0, 0, tzinfo=UTC),
+        # TODO: 'created': datetime(2019, 1, 1, 0, 0, tzinfo=UTC),
         'updated': None
     }
     assert type(old_obj['provider']) == str
@@ -118,8 +119,7 @@ def test_resource_to_dict(
         'provider': "azure",
         'resource_type': 'aws.ec2.instance',
         'tags': [
-            {"name": "ms-resource-usage", "value": "azure-cloud-shell", "provider": None},
-            {"name": "key1", "value": "value1", "provider": "azure"},
+            {"name": "ms-resource-usage", "value": "azure-cloud-shell", "provider": "azure", "company": "my-company"},
         ],
         'metas': {'key1': 2, 'key2': 'deux', 'key3': 'trois'},
         'active': True,

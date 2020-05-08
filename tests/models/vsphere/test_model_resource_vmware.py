@@ -26,10 +26,10 @@ def test_create_success(
 
     assert obj.slug == "group-d1-datacenter-dc0-folder-1-vm-myvm"
 
-    assert ResourceEventChange.objects.count() == 1
-    event = ResourceEventChange.objects.first()
-    assert event.action == constants.EventChangeType.CREATE
-    assert event.new_object["name"] == "myvm"
+    # assert ResourceEventChange.objects.count() == 1
+    # event = ResourceEventChange.objects.first()
+    # assert event.action == constants.EventChangeType.CREATE
+    # assert event.new_object["name"] == "myvm"
 
 def test_error_duplicate(
         mce_app_company,
@@ -86,7 +86,7 @@ def test_error_null_and_blank_value(
         mce_app_provider_vmware,
         mce_app_resource_type_vsphere_vm,
         mce_app_vsphere_datacenter):
-    """test null and blank value"""
+    """test null and blank value constraints"""
 
     with pytest.raises(ValidationError) as excinfo:
         CURRENT_MODEL.objects.create(

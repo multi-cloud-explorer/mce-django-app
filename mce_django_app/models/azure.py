@@ -15,10 +15,13 @@ from mce_django_app import signals
 from mce_django_app.models.common import (
     Resource,
     BaseSubscription,
+    Region,
 )
 
-# TODO: Azure Account avec tenant optionnel
-
+__all__ = [
+    'SubscriptionAzure',
+    'ResourceAzure'
+]
 
 class SubscriptionAzure(BaseSubscription):
     """Cloud Subscription Model"""
@@ -29,9 +32,8 @@ class SubscriptionAzure(BaseSubscription):
         models.CharField(max_length=255, verbose_name=_("Password or Secret Key"), null=True, blank=True)
     )
 
+    # TODO: Model
     tenant = models.CharField(max_length=255)
-
-    location = models.CharField(max_length=255)
 
     is_china = models.BooleanField(default=False)
 
@@ -46,36 +48,53 @@ class SubscriptionAzure(BaseSubscription):
             password=self.password,
             is_china=self.is_china,
         )
-        #if self.account:
-        #    data["user"] = self.account.username
-        #    data["password"] = self.account.password
         return data
 
-# # TODO: supprimer. Devient un ForeingKey(self) dans Resource
-# class ResourceGroupAzure(Resource):
-#
-#     location = models.CharField(max_length=255)
-#
-#     subscription = models.ForeignKey(SubscriptionAzure, on_delete=models.PROTECT)
-#
-#     def to_dict(self, fields=None, exclude=None):
-#         data = super().to_dict(fields=fields, exclude=exclude)
-#         data['subscription'] = self.subscription.subscription_id
-#         return data
-
+    class Meta:
+        verbose_name = _("Azure Subscription")
+        verbose_name_plural = _("Azure Subscriptions")
 
 class ResourceAzure(Resource):
+
+    subscription = models.ForeignKey(SubscriptionAzure, on_delete=models.PROTECT)
+
+    region = models.ForeignKey(Region, on_delete=models.PROTECT)
 
     # Que 46 sur 421 ont un kind !!!
     kind = models.CharField(max_length=255, null=True, blank=True)
 
-    location = models.CharField(max_length=255)
+    # "sku": {
+    #     "name": "Standard_LRS",
+    #     "tier": "Standard"
+    # }
+    sku = JSONField(default={}, null=True, blank=True)
 
-    subscription = models.ForeignKey(SubscriptionAzure, on_delete=models.PROTECT)
+    # TODO: utiliser un champs CharField pour faire plus simple ?
+    resource_group = models.ForeignKey(
+        'self',
+        on_delete=models.PROTECT,
+        #related_name="resources",
+        null=True, blank=True
+    )
 
-    resource_group = models.ForeignKey('self', on_delete=models.PROTECT, null=True, blank=True)
+    # "plan": {
+    #     "name": "ContainerInsights(log)",
+    #     "publisher": "Microsoft",
+    #     "promotionCode": "",
+    #     "product": "OMSGallery/ContainerInsights"
+    # }
+    plan = JSONField(default={}, null=True, blank=True)
 
-    # TODO: clean(): control si même provider que souscription
+    # TODO: Attention, basé sur resource_id
+    # TODO: utiliser un champs CharField pour faire plus simple ?
+    managed_by = models.CharField(max_length=1024, null=True, blank=True)
+    # managed_by = models.ForeignKey(
+    #     'self',
+    #     on_delete=models.PROTECT,
+    #     # related_name="resources",
+    #     null=True, blank=True
+    # )
+
     @property
     def tenant(self):
         return self.subscription.tenant
@@ -86,45 +105,61 @@ class ResourceAzure(Resource):
 
     @property
     def resource_group_name(self):
-        return self.resource_group.name
+        if self.resource_group:
+            return self.resource_group.name
+
+    @property
+    def region_name(self):
+        return self.region.name
 
     def clean_fields(self, exclude=None):
         errors = {}
+
         try:
             super().clean_fields(exclude=exclude)
         except ValidationError as err:
             errors = err.error_dict
-        if not self.resource_group and self.resource_type and self.resource_type.name.lower() != "microsoft.resources/resourcegroups":
-            errors['resource_group'] = ValidationError(_("This field cannot be null."), code="required")
+
+        if getattr(self, 'subscription', None):
+            if self.subscription.provider.pk != self.provider.pk:
+                msg = f"Provider [{self.provider}] is not same of Subscription Provider [{self.subscription.provider.name}]."
+                errors["provider"] = ValidationError(_(msg))
+
+        if getattr(self, 'resource_group', None) and getattr(self, 'resource_type', None):
+            if not self.resource_group and self.resource_type and self.resource_type.name.lower() != "microsoft.resources/resourcegroups":
+                errors['resource_group'] = ValidationError(_("This field cannot be null."), code="required")
 
         if errors:
             raise ValidationError(errors)
 
-    sku = JSONField(default={}, null=True, blank=True)
-
     def to_dict(self, fields=None, exclude=None):
         data = super().to_dict(fields=fields, exclude=exclude)
+
         data['subscription'] = self.subscription.subscription_id
+        data['region'] = self.region.name
+
         if self.resource_group:
             data['resource_group'] = self.resource_group.name
-        if self.sku:
-            data['sku'] = dict(self.sku)
+
+        if self.managed_by:
+            data['managed_by'] = self.managed_by.name
+
         return data
 
+    class Meta:
+        verbose_name = _("Azure Resource")
+        verbose_name_plural = _("Azure Resources")
+
+
 """
-TODO: class ResourceAzureVM(ResourceAzure):
-
-properties: dict = {}
-plan: dict = {}
-managedBy: str = None
-
-dns_name
-ip_address
-os_type
-os_name
-state (si vm : started|stopped)
-sync_state: new|???
-geo localisation ?
+TODO: class ResourceAzureVM(ResourceAzure): ?
+    dns_name
+    ip_address
+    os_type
+    os_name
+    state (si vm : started|stopped)
+    sync_state: new|???
+    geo localisation ?
 """
 
 if getattr(settings, "MCE_CHANGES_ENABLE", False):

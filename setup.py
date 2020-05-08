@@ -4,6 +4,7 @@ from setuptools import setup, find_packages
 import versioneer
 
 install_requires = [
+    'wheel',
     'Django>=3.0',
     'django-extensions',
     'django-cryptography',
@@ -12,12 +13,28 @@ install_requires = [
     'furl',
     'jsonpatch>=1.25,<2',
     'djangorestframework',
+    'djangorestframework-guardian',
     'django-daterangefilter',
+    'django-filter',
+    'django-select2',
     'jsonfield',
+    'tabulate', # commands
+    'django-taggit',
+    'django-organizations',
+    'django-mptt',
+    'django-formtools',
 
     'django-dynamic-fixture>=3.1.0', # for mce_django_app.pytest.plugin
-    'pytest>=5.4.1',          # for mce_django_app.pytest.plugin
+    'pytest>=5.4.1',                 # for mce_django_app.pytest.plugin
 ]
+
+mce_lib_requires = [
+    'mce-lib-azure@git+https://github.com/multi-cloud-explorer/mce-lib-azure.git@master#egg=mce_lib_azure',
+    'mce-lib-vsphere@git+https://github.com/multi-cloud-explorer/mce-lib-vsphere.git@master#egg=mce_lib_vsphere',
+    #'mce-lib-gcp@git+https://github.com/multi-cloud-explorer/mce-lib-gcp.git@master#egg=mce_lib_gcp',
+    'mce-lib-aws@git+https://github.com/multi-cloud-explorer/mce-lib-aws.git@master#egg=mce_lib_aws',
+]
+install_requires.extend(mce_lib_requires)
 
 tests_requires = [
     'psycopg2-binary',
@@ -35,12 +52,13 @@ tests_requires = [
     'coverage',
     'responses',
     'freezegun',
+    'docker',
 
     'jsonpatch',
     'django-environ',
     'django-filter',
     'django-select2',
-    'django-daterangefilter',
+    'django-allauth',
 
     'django-cors-headers',
     'djoser',

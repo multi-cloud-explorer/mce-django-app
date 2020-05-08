@@ -51,6 +51,10 @@ class Vcenter(BaseModel):
         """Auth format for `mce_lib_vsphere.core.Client`"""
         return self.url
 
+    class Meta:
+        verbose_name = _("VMware Vcenter")
+        verbose_name_plural = _("VMware Vcenters")
+
 class DatacenterVMware(Resource):
 
     vcenter = models.ForeignKey(
@@ -65,6 +69,10 @@ class DatacenterVMware(Resource):
     @property
     def vcenter_name(self):
         return self.vcenter.name
+
+    class Meta:
+        verbose_name = _("VMware Datacenter")
+        verbose_name_plural = _("VMware Datacenters")
 
 class ResourceVMware(Resource):
 
@@ -82,6 +90,10 @@ class ResourceVMware(Resource):
     @property
     def datacenter_name(self):
         return self.datacenter.name
+
+    class Meta:
+        verbose_name = _("VMware Resource")
+        verbose_name_plural = _("VMware Resources")
 
 # TODO: hériter directement de Resource ?
 # class ResourceVMwareVM(ResourceVMware):

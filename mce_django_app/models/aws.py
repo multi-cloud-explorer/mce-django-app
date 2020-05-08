@@ -14,6 +14,9 @@ from mce_django_app import signals
 from mce_django_app.models.common import BaseModel, Resource, BaseSubscription
 
 """
+https://github.com/boto/botocore/blob/master/botocore/data/endpoints.json
+> services par régions !
+
 Regions:
 ec2 = boto3.client('ec2')
 response = ec2.describe_regions()

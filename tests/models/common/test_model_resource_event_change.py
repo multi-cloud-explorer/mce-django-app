@@ -1,9 +1,3 @@
-import json
-import pytest
-from django.core.exceptions import ValidationError
-import jsonpatch
-
-from django.core.serializers.json import DjangoJSONEncoder
 from freezegun import freeze_time
 
 from mce_django_app import constants
@@ -30,8 +24,10 @@ def test_resource_event_change_create(mce_app_resource):
     #qs = CURRENT_MODEL.objects.filter(action=constants.EventChangeType.CREATE)
 
 @freeze_time("2019-01-01")
-def test_resource_event_change_update(mce_app_resource):
+def test_resource_event_change_update(settings, mce_app_resource):
     """UPDATE Event for Resource"""
+
+    settings.MCE_CHANGES_ENABLE = True
 
     old_resource = mce_app_resource
     old_obj = old_resource.to_dict(exclude=["created", "updated"])

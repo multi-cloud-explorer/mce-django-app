@@ -13,6 +13,17 @@ from mce_django_app import signals
 
 from mce_django_app.models.common import BaseModel, Resource, BaseSubscription
 
+"""
+from mptt.models import MPTTModel, TreeForeignKey
+
+class FolderGCP(BaseModel):
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children', db_index=True, on_delete=models.PROTECT)
+
+    class MPTTMeta:
+        #order_insertion_by = ['position']
+        parent_attr = 'parent'
+"""
+
 class ProjectGCP(BaseModel):
     """GCP Project Model"""
 
@@ -27,7 +38,7 @@ class ProjectGCP(BaseModel):
 
     project_id = models.CharField(max_length=255, verbose_name=_("Project ID"))
 
-    credentials = encrypt(JSONField(default={}, null=True, blank=True))
+    credentials = JSONField(default={}, null=True, blank=True)
 
     username = models.CharField(max_length=255, verbose_name=_("Username or Client ID"), null=True, blank=True)
 
@@ -35,7 +46,7 @@ class ProjectGCP(BaseModel):
         models.CharField(max_length=255, verbose_name=_("Password or Secret Key"), null=True, blank=True)
     )
 
-    assume_role = models.CharField(max_length=255, verbose_name=_("Assume Role"), null=True, blank=True)
+    #assume_role = models.CharField(max_length=255, verbose_name=_("Assume Role"), null=True, blank=True)
 
     #profile_name = models.CharField(max_length=255, verbose_name=_("Profile Name"), null=True, blank=True)
 
@@ -49,6 +60,10 @@ class ProjectGCP(BaseModel):
             assume_role=self.assume_role,
         )
         return data
+
+    # class Meta:
+    #     verbose_name = "Google Cloud Platform"
+    #     verbose_name_plural = "Google Cloud Platform"
 
 class ResourceGCP(Resource):
 

@@ -1,6 +1,9 @@
 import pytest
 
+from guardian.shortcuts import assign_perm, get_perms, get_objects_for_user, get_objects_for_group
 from django.core.exceptions import ValidationError
+
+#get_group_perms
 
 from mce_django_app.models import common as models
 
@@ -27,7 +30,7 @@ def test_company_error_duplicate():
         )        
 
     assert excinfo.value.message_dict == {
-        'name': ['Entreprise with this Name already exists.']
+        'name': ['Company with this Name already exists.']
     }
 
 def test_company_error_max_length():

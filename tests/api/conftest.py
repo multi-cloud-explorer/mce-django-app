@@ -17,10 +17,14 @@ def client():
     return APIClient(enforce_csrf_checks=False)
 
 @pytest.fixture
-def user():
-    return G(get_user_model())
+def user(mce_app_company):
+    return G(get_user_model(), company=mce_app_company, password="pass")
 
 @pytest.fixture
-def token(user):
-    token, _ = Token.objects.get_or_create(user=user)
-    return token
+def service_user(mce_app_company):
+    return G(get_user_model(), company=mce_app_company, is_service=True, password=None)
+
+# @pytest.fixture
+# def token(user):
+#     token, _ = Token.objects.get_or_create(user=user)
+#     return token
