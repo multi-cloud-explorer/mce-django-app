@@ -1,5 +1,7 @@
 import pytest
 
+pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
+
 pytest_plugins = [
     "mce_django_app.pytest.plugin",
     #"mce_lib_vsphere.pytest.plugin"

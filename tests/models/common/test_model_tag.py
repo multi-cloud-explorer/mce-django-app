@@ -1,7 +1,5 @@
 import pytest
 
-pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
-
 from django.core.exceptions import ValidationError
 
 from mce_django_app.models import common as models

@@ -3,8 +3,6 @@ from django.db import models
 import pytest
 from freezegun import freeze_time
 
-pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
-
 from mce_django_app import utils
 
 # TODO: test JSONField

@@ -8,6 +8,8 @@ from freezegun import freeze_time
 
 from mce_django_app.models import common as models
 
+pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
+
 @freeze_time("2019-01-01")
 def test_resource_success(
         mce_app_resource_type_azure,
