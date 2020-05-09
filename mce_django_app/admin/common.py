@@ -3,7 +3,7 @@ from django.contrib.admin import ModelAdmin
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
-from guardian.admin import GuardedModelAdmin
+#from guardian.admin import GuardedModelAdmin
 from daterangefilter.filters import PastDateRangeFilter
 
 from mce_django_app.models import common as models
@@ -34,7 +34,7 @@ html_asset_task_state.short_description = _('State')
 #     return obj.company.name
 # company_name.short_description = _('Société')
 
-class BaseModelAdmin(GuardedModelAdmin):
+class BaseModelAdmin(ModelAdmin):
     list_per_page = 25
     list_max_show_all = 100
     save_on_top = True
@@ -87,9 +87,9 @@ class CompanyAdmin(BaseModelAdmin):
     list_display = ['name', 'created', 'updated']
     search_fields = ['name']
     sortable_by = ['name']
-    readonly_fields = ['name', 'owner_group', 'user_group']
+    readonly_fields = ['name'] #, 'owner_group', 'user_group']
     #list_select_related = ['providers', 'regions', 'zones', 'resource_types'] #,
-    list_select_related = ['owner_group', 'user_group']
+    #list_select_related = ['owner_group', 'user_group']
 
     fieldsets = (
         (None, {
@@ -99,10 +99,10 @@ class CompanyAdmin(BaseModelAdmin):
             'classes': ('collapse',),
             'fields': ('providers', 'regions', 'zones', 'resource_types'),
         }),
-        ('Security', {
-            'classes': ('collapse',),
-            'fields': ('owner_group', 'user_group'),
-        }),
+        # ('Security', {
+        #     'classes': ('collapse',),
+        #     'fields': ('owner_group', 'user_group'),
+        # }),
     )
 
 @admin.register(models.Tag)

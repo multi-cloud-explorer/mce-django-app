@@ -1,5 +1,3 @@
-from itertools import chain
-
 from furl import furl
 import jsonpatch
 
@@ -16,7 +14,7 @@ from django.contrib.sites.models import Site
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from guardian.shortcuts import assign_perm
+#from guardian.shortcuts import assign_perm
 from django_extensions.db.fields import AutoSlugField
 from django_cryptography.fields import encrypt
 from jsonfield import JSONField
@@ -51,18 +49,7 @@ class BaseModelMixin:
         super().save(*args, **kwargs)
 
     def to_dict(self, fields=None, exclude=None):
-        opts = self._meta
-        data = {}
-        for f in chain(opts.concrete_fields, opts.private_fields, opts.many_to_many):
-            # if not getattr(f, 'editable', False):
-            #    continue
-            if fields and f.name not in fields:
-                continue
-            if exclude and f.name in exclude:
-                continue
-            data[f.name] = f.value_from_object(self)
-        return data
-
+        return utils.model_instance_to_dict(self, fields, exclude)
 
 class BaseModel(BaseModelMixin, models.Model):
     """Base for all MCE models"""
@@ -190,19 +177,19 @@ class Company(BaseModel):
 
     resource_types = models.ManyToManyField(ResourceType)
 
-    owner_group = models.ForeignKey(
-        Group, 
-        on_delete=models.PROTECT,
-        related_name="company_owners",
-        null=True, blank=True
-    )
-
-    user_group = models.ForeignKey(
-        Group, 
-        on_delete=models.PROTECT,
-        related_name="company_users",
-        null=True, blank=True
-    )
+    # owner_group = models.ForeignKey(
+    #     Group,
+    #     on_delete=models.PROTECT,
+    #     related_name="company_owners",
+    #     null=True, blank=True
+    # )
+    #
+    # user_group = models.ForeignKey(
+    #     Group,
+    #     on_delete=models.PROTECT,
+    #     related_name="company_users",
+    #     null=True, blank=True
+    # )
 
     class Meta:
         ordering = ['name']
@@ -219,7 +206,7 @@ class Tag(BaseModel):
 
     provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
 
-    company = models.ForeignKey(Company, on_delete=models.PROTECT)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
 
     @property
     def provider_name(self):
@@ -274,7 +261,7 @@ class BaseSubscription(BaseModel):
     name = models.CharField(max_length=255)
 
     company = models.ForeignKey(
-        Company, on_delete=models.PROTECT,
+        Company, on_delete=models.CASCADE,
         related_name="%(app_label)s_%(class)s_related",
         related_query_name="%(app_label)s_%(class)ss"
     )
@@ -322,14 +309,14 @@ class Resource(BaseModel):
     # TODO: limit choices same provider
     resource_type = models.ForeignKey(ResourceType, on_delete=models.PROTECT)
 
-    company = models.ForeignKey(Company, on_delete=models.PROTECT)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
 
     # TODO: limit choices same provider
     tags = models.ManyToManyField(Tag)
 
     metas = JSONField(default={}, null=True, blank=True)
 
-    changes = GenericRelation('ResourceEventChange', related_query_name='resource')
+    #changes = GenericRelation('ResourceEventChange', related_query_name='resource')
 
     locked = models.BooleanField(default=False)
 
@@ -354,7 +341,7 @@ class Resource(BaseModel):
 
     def to_dict(self, fields=None, exclude=[]):
         exclude = exclude or []
-        exclude.append("changes")
+        #exclude.append("changes")
         exclude.append("resource_ptr")
         # exclude.append("tagged_items")
         # exclude.append("categories")
@@ -454,7 +441,7 @@ class ResourceEventChange(BaseModel):
         ordering = ['-created', 'object_id']
 
 
-@receiver(post_save, sender=Company)
+#@receiver(post_save, sender=Company)
 def create_default_groups_for_new_company(sender, instance=None, created=None, **kwargs):
     """Create default Groups for new Company
     
@@ -469,11 +456,12 @@ def create_default_groups_for_new_company(sender, instance=None, created=None, *
     """
     if not created:
         return
+
     if instance.owner_group and instance.user_group:
         return
 
     group_name = f"{instance.slug.replace('-', '_')}_Admins"
-    admins = Group.objects.create(name=group_name)
+    admins, created = Group.objects.get_or_create(name=group_name)
 
     """
     # TODO: perms for admin group
@@ -485,7 +473,7 @@ def create_default_groups_for_new_company(sender, instance=None, created=None, *
     """
 
     group_name = f"{instance.slug.replace('-', '_')}_Users"
-    users = Group.objects.create(name=group_name)
+    users, created = Group.objects.get_or_create(name=group_name)
     # TODO: perms for user group
 
     instance.owner_group = admins

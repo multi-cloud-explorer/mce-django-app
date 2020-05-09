@@ -33,7 +33,7 @@ class Vcenter(BaseModel):
                         overwrite=True, unique=True)
 
     company = models.ForeignKey(
-        Company, on_delete=models.PROTECT,
+        Company, on_delete=models.CASCADE,
     )
 
     # FIXME: encrypt(

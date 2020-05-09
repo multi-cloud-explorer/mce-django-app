@@ -1,10 +1,17 @@
 from django.db import models
 
+class UserRole(models.TextChoices):
+    OWNER = "owner"
+    USER = "user"
+    SERVICE = "service"
+
+
 class InventoryMode(models.TextChoices):
     PULL            = "pull"    # déclencher par MCE server ou worker, se connecte aux souscriptions et pull les datas
     PUSH            = "push"    # worker coté souscription, push data par api rest
     EVENT           = "event"   # event grid et function api push resource par resource
     QUEUE           = "queue"   # prendre dans une queue (SQS, Autres)
+
 
 class Provider(models.TextChoices):
     AWS             = "aws"
@@ -20,10 +27,12 @@ class Provider(models.TextChoices):
     CLOUDSTACK      = "cloudstack"
     DIGITALOCEAN    = "digitalocean"
 
+
 class EventChangeType(models.TextChoices):
     CREATE = "create"
     UPDATE = "update"
     DELETE = "delete"
+
 
 class TaskState(models.TextChoices):
     UNKNOW    = 'unknow'
@@ -33,6 +42,7 @@ class TaskState(models.TextChoices):
     STARTED   = 'started'
     DEFERRED  = 'deferred'
     SCHEDULED = 'scheduled'
+
 
 class VsphereResourceTypes(models.TextChoices):
     DATACENTER = "vmware/datacenter"

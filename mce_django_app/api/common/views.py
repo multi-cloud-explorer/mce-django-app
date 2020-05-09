@@ -1,51 +1,130 @@
+#from django.http import HttpRequest, HttpResponse
 from rest_framework import viewsets
-from rest_framework import authentication, generics, permissions, serializers, status
-from rest_framework_guardian.filters import (DjangoObjectPermissionsFilter, ObjectPermissionsFilter)
-
+#from rest_framework import authentication, generics, serializers, status
+#from rest_framework_guardian.filters import ObjectPermissionsFilter
+#from djoser.permissions import CurrentUserOrAdmin, CurrentUserOrAdminOrReadOnly
+from rest_framework.permissions import SAFE_METHODS
 from mce_django_app.models import common as models
+
+from mce_django_app.api import perms
 
 from . import serializers
 
-# DjangoModelPermissions
-# DjangoObjectPermissions
+# class CustomObjectPermissions(permissions.DjangoObjectPermissions):
+#     """
+#     Similar to `DjangoObjectPermissions`, but adding 'view' permissions.
+#     """
+#     perms_map = {
+#         'GET': ['%(app_label)s.view_%(model_name)s'],
+#         'OPTIONS': ['%(app_label)s.view_%(model_name)s'],
+#         'HEAD': ['%(app_label)s.view_%(model_name)s'],
+#         'POST': ['%(app_label)s.add_%(model_name)s'],
+#         'PUT': ['%(app_label)s.change_%(model_name)s'],
+#         'PATCH': ['%(app_label)s.change_%(model_name)s'],
+#         'DELETE': ['%(app_label)s.delete_%(model_name)s'],
+#     }
 
-class ResourceEventChangeViewSet(viewsets.ModelViewSet):
+from rest_framework import status
+from rest_framework.response import Response
+from django.db.models.deletion import ProtectedError
 
-    queryset = models.ResourceEventChange.objects.all().order_by('-updated', '-created')
-    serializer_class = serializers.ResourceEventChangeSerializer
-    permission_classes = [permissions.IsAuthenticated]
+class DestroyModelMixin(object):
+    """
+    Destroy a model instance.
+    """
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            self.perform_destroy(instance)
+        except ProtectedError as e:
+            return Response(status=status.HTTP_423_LOCKED, data={'detail':str(e)})
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()
 
 
-# class GenericAccountViewSet(viewsets.ModelViewSet):
-#
-#     queryset = models.GenericAccount.objects.all()
-#     serializer_class = serializers.GenericAccountSerializer
-#     permission_classes = [permissions.IsAuthenticated]
-#
+class WithCompanyFieldMixin:
 
-class CompanyiewSet(viewsets.ModelViewSet):
+    permission_classes = [perms.TagPermissions]
 
-    queryset = models.Company.objects.all()
-    serializer_class = serializers.CompanySerializer
-    permission_classes = [permissions.IsAuthenticated]
-    # TODO: filter_backends = [ObjectPermissionsFilter]
+    def get_queryset(self):
+        if not self.request.user.is_active:
+            return self.queryset.model.objects.none()
 
-class TagViewSet(viewsets.ModelViewSet):
+        if self.request.user.is_superuser:
+            return self.queryset
 
-    queryset = models.Tag.objects.all()
-    serializer_class = serializers.TagSerializer
-    permission_classes = [permissions.IsAuthenticated]
+        return self.queryset.filter(company__pk=self.request.user.company.pk)
+
+
+class ProviderViewSet(viewsets.ModelViewSet):
+
+    queryset = models.Provider.objects.all()
+    serializer_class = serializers.ProviderSerializer
+    #permission_classes = [perms.MCEPermissions]
+
+
+class RegionViewSet(viewsets.ModelViewSet):
+
+    queryset = models.Region.objects.all()
+    serializer_class = serializers.RegionSerializer
+    #permission_classes = [permissions.IsAuthenticated]
 
 
 class ResourceTypeViewSet(viewsets.ModelViewSet):
 
     queryset = models.ResourceType.objects.all()
     serializer_class = serializers.ResourceTypeSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
 
 
-class ResourceViewSet(viewsets.ModelViewSet):
+class CompanyiewSet(DestroyModelMixin, viewsets.ModelViewSet):
+
+    queryset = models.Company.objects.all()
+    serializer_class = serializers.CompanySerializer
+    permission_classes = [perms.CompanyPermissions]
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return self.queryset
+
+        if not self.request.user.company:
+            return models.Company.objects.none()
+
+        return self.queryset.filter(pk=self.request.user.company.pk)
+
+
+class TagViewSet(WithCompanyFieldMixin, viewsets.ModelViewSet):
+
+    queryset = models.Tag.objects.all()
+    serializer_class = serializers.TagSerializer
+    # permission_classes = [perms.TagPermissions]
+
+    # def get_queryset(self):
+    #     if not self.request.user.is_active:
+    #         return self.queryset.model.objects.none()
+    #
+    #     if self.request.user.is_superuser:
+    #         return self.queryset
+    #
+    #     return self.queryset.filter(company__pk=self.request.user.company.pk)
+
+
+class ResourceViewSet(WithCompanyFieldMixin, viewsets.ModelViewSet):
 
     queryset = models.Resource.objects.all().order_by('-created')
     serializer_class = serializers.ResourceSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
+    # filter_backends = [ObjectPermissionsFilter]
+
+    def get_queryset(self):
+        return self.queryset.filter(company__pk=self.request.user.company.pk)
+
+class ResourceEventChangeViewSet(viewsets.ModelViewSet):
+
+    queryset = models.ResourceEventChange.objects.all().order_by('-updated', '-created')
+    serializer_class = serializers.ResourceEventChangeSerializer
+    # permission_classes = [permissions.IsAuthenticated]
+
+

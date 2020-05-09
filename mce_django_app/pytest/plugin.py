@@ -9,7 +9,7 @@ from ddf import G, M
 from freezegun import freeze_time
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from guardian.shortcuts import assign_perm
+#from guardian.shortcuts import assign_perm
 
 pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
@@ -108,6 +108,14 @@ def mce_app_company_group_admins():
 def mce_app_company_group_users():
     return Group.objects.create(name="my_company_Users")
 
+@pytest.fixture
+def mce_app_company2_group_admins2():
+    return Group.objects.create(name="my_company2_Admins")
+
+@pytest.fixture
+def mce_app_company2_group_users2():
+    return Group.objects.create(name="my_company2_Users")
+
 # --- common : Company
 
 @pytest.fixture
@@ -120,8 +128,26 @@ def mce_app_company(
 
     obj = common.Company.objects.create(
         name="my-company",
-        owner_group=mce_app_company_group_admins,
-        user_group=mce_app_company_group_users
+        # owner_group=mce_app_company_group_admins,
+        # user_group=mce_app_company_group_users
+    )
+    obj.providers.set(mce_app_provider_all)
+    obj.regions.add(mce_app_region)
+
+    return obj
+
+@pytest.fixture
+def mce_app_company2(
+        mce_app_company2_group_admins2,
+        mce_app_company2_group_users2,
+        mce_app_provider_all,
+        mce_app_region,
+    ):
+
+    obj = common.Company.objects.create(
+        name="my-company2",
+        # owner_group=mce_app_company2_group_admins2,
+        # user_group=mce_app_company2_group_users2
     )
     obj.providers.set(mce_app_provider_all)
     obj.regions.add(mce_app_region)
@@ -131,39 +157,67 @@ def mce_app_company(
 # --- account : User
 
 @pytest.fixture
-def mce_app_user_with_company(mce_app_company):
-    # Token
-    return USER_MODEL.objects.create(
+def mce_app_user_with_company(mce_app_company, mce_app_company_group_admins):
+    """Admin user for company"""
+
+    obj = USER_MODEL.objects.create(
         username="user1",
         email="user1@localhost.net",
-        company=mce_app_company
+        company=mce_app_company,
+        role=constants.UserRole.OWNER
     )
-
-@pytest.fixture
-def mce_app_user_admins(mce_app_company, mce_app_company_group_admins):
-    obj = USER_MODEL.objects.create(
-        username="company_admin_1",
-        email="company_admin_1@localhost.net",
-        company=mce_app_company
-    )
-    obj.groups.add(mce_app_company_group_admins)
+    #obj.groups.add(mce_app_company_group_admins)
     return obj
 
+
 @pytest.fixture
-def mce_app_user_users(mce_app_company, mce_app_company_group_users):
+def mce_app_user_admin(mce_app_user_with_company):
+    return mce_app_user_with_company
+
+
+@pytest.fixture
+def mce_app_user_user(mce_app_company, mce_app_company_group_users):
+    """Normal user for company"""
     obj = USER_MODEL.objects.create(
         username="company_user_2",
         email="company_user_2@localhost.net",
-        company=mce_app_company
+        company=mce_app_company,
+        role=constants.UserRole.USER
     )
-    obj.groups.add(mce_app_company_group_users)
+    #obj.groups.add(mce_app_company_group_users)
     return obj
+
 
 @pytest.fixture
 def mce_app_user_without_company():
-    # Token
     return USER_MODEL.objects.create(username="user2", email="user2@localhost.net")
 
+
+@pytest.fixture
+def mce_app_user_with_other_company(mce_app_company2, mce_app_company2_group_admins2):
+    """Admin user for company"""
+    # Token
+    obj = USER_MODEL.objects.create(
+        username="user_company2",
+        email="user_company2@localhost.net",
+        company=mce_app_company2,
+        role=constants.UserRole.USER
+    )
+    #obj.groups.add(mce_app_company2_group_admins2)
+    return obj
+
+@pytest.fixture
+def mce_app_service_user(mce_app_company, mce_app_company_group_users):
+    """Service user for company"""
+    obj = USER_MODEL.objects.create(
+        username="company_user_service",
+        email="company_user_service@localhost.net",
+        company=mce_app_company,
+        role=constants.UserRole.SERVICE
+    )
+    assert not getattr(obj, "auth_token", None) is None
+    #obj.groups.add(mce_app_company_group_users)
+    return obj
 
 # --- common : ResourceType
 
@@ -231,29 +285,29 @@ def mce_app_tag(mce_app_company, mce_app_provider):
 
 @pytest.fixture
 def mce_app_resource(mce_app_resource_type, mce_app_company):
-    """Return 1 Resource instance with 3 tags"""
+    """Simple minimal resource without tags and metas"""
 
-    resource = G(common.Resource, 
+    obj = common.Resource.objects.create(
         name="myname",
+        resource_id="x1",
         resource_type=mce_app_resource_type,
         company=mce_app_company,
         provider=mce_app_resource_type.provider,
-        tags=G(common.Tag, provider=mce_app_resource_type.provider, n=3)
     )
+    #obj.tags.set(G(common.Tag, company=mce_app_company, provider=mce_app_resource_type.provider, n=3))
+    return obj
 
-    return resource
-
-@pytest.fixture
-def mce_app_resource_list(mce_app_resource_type, mce_app_company):
-    """Return 10 Resource instance with 3 tags"""
-
-    return G(common.Resource,
-        resource_type=mce_app_resource_type,
-        provider=mce_app_resource_type.provider,
-        company=mce_app_company,
-        tags=G(common.Tag, provider=mce_app_resource_type.provider, n=3),
-        n=10,
-    )
+# @pytest.fixture
+# def mce_app_resource_list(mce_app_resource_type, mce_app_company):
+#     """Return 10 Resource instance with 3 tags"""
+#
+#     return G(common.Resource,
+#         resource_type=mce_app_resource_type,
+#         provider=mce_app_resource_type.provider,
+#         company=mce_app_company,
+#         tags=G(common.Tag, provider=mce_app_resource_type.provider, n=3),
+#         n=10,
+#     )
 
 # -- Vmware Vsphere
 

@@ -12,17 +12,10 @@ def api():
     return APIRequestFactory(enforce_csrf_checks=False)
 
 @pytest.fixture
-def client():
+def api_client():
     # client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
     return APIClient(enforce_csrf_checks=False)
 
-@pytest.fixture
-def user(mce_app_company):
-    return G(get_user_model(), company=mce_app_company, password="pass")
-
-@pytest.fixture
-def service_user(mce_app_company):
-    return G(get_user_model(), company=mce_app_company, is_service=True, password=None)
 
 # @pytest.fixture
 # def token(user):

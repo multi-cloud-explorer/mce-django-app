@@ -56,7 +56,7 @@ class SubscriptionAzure(BaseSubscription):
 
 class ResourceAzure(Resource):
 
-    subscription = models.ForeignKey(SubscriptionAzure, on_delete=models.PROTECT)
+    subscription = models.ForeignKey(SubscriptionAzure, on_delete=models.CASCADE)
 
     region = models.ForeignKey(Region, on_delete=models.PROTECT)
 
@@ -72,7 +72,7 @@ class ResourceAzure(Resource):
     # TODO: utiliser un champs CharField pour faire plus simple ?
     resource_group = models.ForeignKey(
         'self',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         #related_name="resources",
         null=True, blank=True
     )

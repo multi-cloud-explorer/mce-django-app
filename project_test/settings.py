@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
 
-    'guardian',
+    #'guardian',
     'formtools',
     'taggit',
     'mptt',
@@ -121,8 +121,8 @@ AUTH_USER_MODEL = 'mce_django_app.User'
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    "allauth.account.auth_backends.AuthenticationBackend",
-    'guardian.backends.ObjectPermissionBackend',
+    #"allauth.account.auth_backends.AuthenticationBackend",
+    #'guardian.backends.ObjectPermissionBackend',
 )
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -218,6 +218,10 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        # FIXME: 'mce_django_app.api.common.views.CustomObjectPermissions'
+    ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
@@ -255,3 +259,5 @@ MCE_CHANGES_ENABLE = False
 # }
 
 #ORGS_SLUGFIELD = 'django_extensions.db.fields.AutoSlugField'
+
+#DDF_DEBUG_MODE = True
