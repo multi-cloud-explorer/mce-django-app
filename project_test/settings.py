@@ -21,6 +21,11 @@ DEBUG = env('MCE_DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ["*"]
 
+INTERNAL_IPS = [
+    '127.0.0.1',
+    '192.168.56.1',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,11 +47,9 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
 
-    #'guardian',
     'formtools',
     'taggit',
     'mptt',
-    #'organizations',
 
     'allauth',
     'allauth.account',
@@ -54,7 +57,6 @@ INSTALLED_APPS = [
     #'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.google',
 
-    #'mce_django_app',
     "mce_django_app.apps.MceAppConfig",
 ]
 
@@ -69,6 +71,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 ROOT_URLCONF = 'project_test.urls'
 
@@ -211,7 +217,12 @@ TEST_RUNNER = 'project_test.runner.PytestTestRunner'
 DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE = 10
 DJANGO_DB_LOGGER_ENABLE_FORMATTER = False
 
-CORS_ORIGIN_ALLOW_ALL = True
+#CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:3000',
+)
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -245,6 +256,9 @@ DJOSER = {
     "USERNAME_RESET_CONFIRM_URL": "#/username/reset/confirm/{uid}/{token}",
     "ACTIVATION_URL": "#/activate/{uid}/{token}",
     #"SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": ["http://test.localhost/"],
+    'SERIALIZERS': {
+        # TODO: 'user': 'mce_django_app.api.account.serializers.CustomUserSerializer',
+    }
 }
 
 
@@ -261,3 +275,8 @@ MCE_CHANGES_ENABLE = False
 #ORGS_SLUGFIELD = 'django_extensions.db.fields.AutoSlugField'
 
 #DDF_DEBUG_MODE = True
+
+# DEBUG_TOOLBAR_CONFIG = {
+#     "ENABLE_STACKTRACES": True,
+#     "ENABLE_STACKTRACES_LOCALS": True
+# }

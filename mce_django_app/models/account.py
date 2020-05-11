@@ -20,6 +20,8 @@ class User(AbstractUser):
     """MCE Account"""
 
     # TODO: id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # TODO: default lang
+    # TODO: default timezone
 
     role = models.CharField(
         max_length=20,
@@ -76,39 +78,37 @@ class User(AbstractUser):
         return data
 
 
-class UserProfile(BaseModel):
-
-    # TODO: default lang
-    # TODO: default timezone
-
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        models.CASCADE,
-        related_name="profile"
-    )
-
-    slug = AutoSlugField(
-        primary_key=True,
-        max_length=300,
-        populate_from=['user__username'],
-        overwrite=True,
-        unique=True
-    )
-
-    class Meta:
-        verbose_name = "User Profile"
-        verbose_name_plural = "User Profiles"
-
-    def __str__(self):
-        return self.user.username
+# class UserProfile(BaseModel):
+#
+#
+#     user = models.OneToOneField(
+#         settings.AUTH_USER_MODEL,
+#         models.CASCADE,
+#         related_name="profile"
+#     )
+#
+#     slug = AutoSlugField(
+#         primary_key=True,
+#         max_length=300,
+#         populate_from=['user__username'],
+#         overwrite=True,
+#         unique=True
+#     )
+#
+#     class Meta:
+#         verbose_name = "User Profile"
+#         verbose_name_plural = "User Profiles"
+#
+#     def __str__(self):
+#         return self.user.username
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
+def create_token(sender, instance=None, created=False, **kwargs):
     """
-    Create token for newly created user.
+    Create token and profile for newly created user.
     """
     if created:
         # TODO: remplacer par un model Token avec expiration
         Token.objects.create(user=instance)
 
-        UserProfile.objects.create(user=instance)
+        #UserProfile.objects.create(user=instance)

@@ -23,6 +23,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     #path('', include(router.urls)),
     path('common/', include('mce_django_app.api.common.urls')),
+    path('tools/', include('mce_django_app.api.tools.urls')),
     path('azure/', include('mce_django_app.api.azure.urls')),
     path('api-token-auth/', authtoken_views.obtain_auth_token),
     re_path(r'^doc/swagger/(?P<format>\.json|\.yaml)/$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

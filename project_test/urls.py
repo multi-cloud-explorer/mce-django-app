@@ -20,3 +20,9 @@ urlpatterns = [
     path('mce/api/v1/', include('mce_django_app.api.urls')),
 ]
 
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
+

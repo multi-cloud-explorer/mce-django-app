@@ -8,7 +8,7 @@ from freezegun import freeze_time
 
 from mce_django_app.models import common as models
 
-#pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
+pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
 @freeze_time("2019-01-01")
 def test_resource_success(
@@ -85,7 +85,7 @@ def test_resource_to_dict(
         'provider': "azure",
         'resource_type': 'aws.ec2.instance',
         'tags': [
-            {"name": "ms-resource-usage", "value": "azure-cloud-shell", "provider": "azure", "company": "my-company"},
+            {"name": "key1", "value": "value1", "provider": "azure", "company": "my-company"},
         ],
         'metas': {'key1': 1, 'key2': 'deux'},
         'active': True,
@@ -121,7 +121,7 @@ def test_resource_to_dict(
         'provider': "azure",
         'resource_type': 'aws.ec2.instance',
         'tags': [
-            {"name": "ms-resource-usage", "value": "azure-cloud-shell", "provider": "azure", "company": "my-company"},
+            {"name": "key1", "value": "value1", "provider": "azure", "company": "my-company"},
         ],
         'metas': {'key1': 2, 'key2': 'deux', 'key3': 'trois'},
         'active': True,

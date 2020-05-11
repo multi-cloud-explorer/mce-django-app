@@ -28,21 +28,24 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.db.models.deletion import ProtectedError
 
-class DestroyModelMixin(object):
+class DestroyModelMixin:
     """
     Destroy a model instance.
     """
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+
         try:
             self.perform_destroy(instance)
         except ProtectedError as e:
             return Response(status=status.HTTP_423_LOCKED, data={'detail':str(e)})
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={'detail':str(e)})
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_destroy(self, instance):
         instance.delete()
-
 
 class WithCompanyFieldMixin:
 
@@ -90,7 +93,7 @@ class CompanyiewSet(DestroyModelMixin, viewsets.ModelViewSet):
             return self.queryset
 
         if not self.request.user.company:
-            return models.Company.objects.none()
+            return self.queryset.model.objects.none()
 
         return self.queryset.filter(pk=self.request.user.company.pk)
 
@@ -111,14 +114,36 @@ class TagViewSet(WithCompanyFieldMixin, viewsets.ModelViewSet):
     #     return self.queryset.filter(company__pk=self.request.user.company.pk)
 
 
-class ResourceViewSet(WithCompanyFieldMixin, viewsets.ModelViewSet):
+class ResourceViewSet(WithCompanyFieldMixin, DestroyModelMixin, viewsets.ModelViewSet):
+
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
     queryset = models.Resource.objects.all().order_by('-created')
     serializer_class = serializers.ResourceSerializer
     # permission_classes = [permissions.IsAuthenticated]
     # filter_backends = [ObjectPermissionsFilter]
 
+    # def destroy(self, *args, **kwargs):
+    #     #serializer = self.get_serializer(self.get_object())
+    #     super().destroy(*args, **kwargs)
+    #     return Response(status=status.HTTP_200_OK)
+    #     #return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def get_serializer_class(self):
+        print('!!! self.action : ', self.action)
+        # create / patch=partial_update
+        if self.action in ['list', 'retrieve']:
+            return serializers.ResourceSerializer
+        else:
+            return serializers.ResourceSerializerDetail
+
     def get_queryset(self):
+        if self.request.user.is_superuser:
+            return self.queryset
+
+        if not self.request.user.company:
+            return self.queryset.model.objects.none()
+
         return self.queryset.filter(company__pk=self.request.user.company.pk)
 
 class ResourceEventChangeViewSet(viewsets.ModelViewSet):

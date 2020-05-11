@@ -8,22 +8,6 @@ from mce_django_app.models import common
 
 pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
-def check_perm(client, url, user=None, token=None, status_code=200, count=1):
-    if user:
-        client.force_authenticate(user=user, token=token)
-    response = client.get(url)
-
-    assert response.status_code == status_code
-
-    #pp(response.json())
-
-    if 'count' in response.json():
-        assert response.json()['count'] == count
-    if 'results' in response.json():
-        return response.json()['results']
-
-    return response.json()
-
 
 @freeze_time("2019-01-01")
 def test_crud_without_permissions(admin_user, api_client):
@@ -92,6 +76,7 @@ def test_crud_without_permissions(admin_user, api_client):
 def test_permissions_list(
         admin_user,
         api_client,
+        check_perm,
         mce_app_company,
         mce_app_company2,
         mce_app_user_admin,
@@ -141,6 +126,7 @@ def test_permissions_list(
 def test_permissions_detail(
         admin_user,
         api_client,
+        check_perm,
         mce_app_company,
         mce_app_company2,
         mce_app_user_admin,

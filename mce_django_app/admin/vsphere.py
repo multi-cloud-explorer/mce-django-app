@@ -17,7 +17,7 @@ class VcenterAdmin(BaseModelAdmin):
     list_select_related = ['company']
 
 @admin.register(models.DatacenterVMware)
-class DatacenterVMwareAdmin(BaseModelAdmin):
+class DatacenterVMwareAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
 
     list_display = (
         'name',
@@ -34,7 +34,7 @@ class DatacenterVMwareAdmin(BaseModelAdmin):
     list_select_related = ['resource_type', 'company', 'vcenter']
 
 @admin.register(models.ResourceVMware)
-class ResourceVMwareAdmin(BaseModelAdmin):
+class ResourceVMwareAdmin(ReadOnlyModelAdminMixIn, BaseModelAdmin):
 
     list_display = (
         'name',

@@ -7,24 +7,47 @@ from django.conf import settings
 
 from django_cryptography.fields import encrypt
 from jsonfield import JSONField
+from django_extensions.db.fields import AutoSlugField
 
 from mce_django_app import utils
 from mce_django_app import constants
 from mce_django_app import signals
 
 from mce_django_app.models.common import (
-    Resource,
-    BaseSubscription,
-    Region,
-)
+    BaseModel, Resource, Region, Provider, Company)
 
 __all__ = [
     'SubscriptionAzure',
     'ResourceAzure'
 ]
 
-class SubscriptionAzure(BaseSubscription):
+
+class SubscriptionAzure(BaseModel):
     """Cloud Subscription Model"""
+
+    subscription_id = models.CharField(
+        unique=True,
+        max_length=1024
+    )
+
+    slug = AutoSlugField(
+        max_length=1024,
+        populate_from=['subscription_id'],
+        overwrite=True,
+        unique=True
+    )
+
+    name = models.CharField(max_length=255)
+
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE,
+        related_name="%(app_label)s_%(class)s_related",
+        related_query_name="%(app_label)s_%(class)ss"
+    )
+
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
+
+    active = models.BooleanField(default=True)
 
     username = models.CharField(max_length=255, verbose_name=_("Username or Client ID"), null=True, blank=True)
 
@@ -49,6 +72,17 @@ class SubscriptionAzure(BaseSubscription):
             is_china=self.is_china,
         )
         return data
+
+    @property
+    def company_name(self):
+        return self.company.name
+
+    @property
+    def provider_name(self):
+        return self.provider.name
+
+    def __str__(self):
+        return f"{self.provider.name} - {self.name}"
 
     class Meta:
         verbose_name = _("Azure Subscription")

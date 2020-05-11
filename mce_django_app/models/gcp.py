@@ -11,7 +11,7 @@ from mce_django_app import utils
 from mce_django_app import constants
 from mce_django_app import signals
 
-from mce_django_app.models.common import BaseModel, Resource, BaseSubscription
+from mce_django_app.models.common import BaseModel, Resource, Company, Provider
 
 """
 from mptt.models import MPTTModel, TreeForeignKey
@@ -27,49 +27,59 @@ class FolderGCP(BaseModel):
 class ProjectGCP(BaseModel):
     """GCP Project Model"""
 
-    # labels
+    # name: str
+    # full_name: str
+    # labels: {}
     # number (char)
     # parent: dict
     # status: text (ACTIVE|...)
-    # full_name
     # path:  /projects/mce-labo
-    # project_id = str = mce-labo
+    # project_id = str = 'mce-labo'
     # scopes ?
 
-    project_id = models.CharField(max_length=255, verbose_name=_("Project ID"))
+    name = models.CharField(max_length=255)
+
+    project_id = models.CharField(max_length=255, unique=True, verbose_name=_("Project ID"))
+
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE,
+        related_name="%(app_label)s_%(class)s_related",
+        related_query_name="%(app_label)s_%(class)ss"
+    )
+
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
 
     credentials = JSONField(default={}, null=True, blank=True)
 
-    username = models.CharField(max_length=255, verbose_name=_("Username or Client ID"), null=True, blank=True)
-
-    password = encrypt(
-        models.CharField(max_length=255, verbose_name=_("Password or Secret Key"), null=True, blank=True)
-    )
-
-    #assume_role = models.CharField(max_length=255, verbose_name=_("Assume Role"), null=True, blank=True)
-
-    #profile_name = models.CharField(max_length=255, verbose_name=_("Profile Name"), null=True, blank=True)
-
     def get_auth(self):
-        """Auth format for `mce_lib_aws.???`"""
+        """Auth format for `mce_lib_gcp.???`"""
 
         data = dict(
-            subscription_id=self.subscription_id,
-            user=self.username,
-            password=self.password,
-            assume_role=self.assume_role,
+            project_id=self.project_id,
+            credentials=self.credentials,
         )
         return data
 
-    # class Meta:
-    #     verbose_name = "Google Cloud Platform"
-    #     verbose_name_plural = "Google Cloud Platform"
+    class Meta:
+        verbose_name = _("GCP Project")
+        verbose_name_plural = _("GCP Projects")
+
 
 class ResourceGCP(Resource):
 
     project = models.ForeignKey(ProjectGCP, on_delete=models.PROTECT)
 
-    # datacenter ?
+    @property
+    def project_name(self):
+        return self.project.name
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("GCP Project")
+        verbose_name_plural = _("GCP Projects")
+
 
 if getattr(settings, "MCE_CHANGES_ENABLE", False):
 

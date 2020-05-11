@@ -67,21 +67,21 @@ class ResourceSerializer(serializers.ModelSerializer):
 
     provider = serializers.HyperlinkedIdentityField(
         view_name="common:provider-detail",
-        read_only=True
+        # read_only=True
     )
 
     resource_type = serializers.HyperlinkedIdentityField(
         view_name="common:resourcetype-detail",
-        read_only=True
+        # read_only=True
     )
 
     company = serializers.HyperlinkedIdentityField(
         view_name="common:company-detail",
-        read_only=True
+        # read_only=True
     )
 
     tags = serializers.HyperlinkedIdentityField(
-        view_name="common:company-detail",
+        view_name="common:tag-detail",
         many=True,
         read_only=True # TODO: ?
     )
@@ -90,6 +90,25 @@ class ResourceSerializer(serializers.ModelSerializer):
         model = models.Resource
         fields = '__all__'
 
+class ResourceSerializerDetail(serializers.ModelSerializer):
+
+    metas = serializers.JSONField(required=False)
+
+    #tags = TagSerializer(many=True)
+
+    class Meta:
+        model = models.Resource
+        #fields = '__all__'
+        #read_only_fields = ["tags"]
+        fields = [
+            'id',
+            'name',
+            'resource_id',
+            'company',
+            'provider',
+            'resource_type',
+            'metas'
+        ]
 
 class ResourceEventChangeSerializer(serializers.ModelSerializer):
 

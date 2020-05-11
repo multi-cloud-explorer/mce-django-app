@@ -30,7 +30,6 @@ __all__ = [
     'Company',
     'Tag',
     'ResourceType',
-    'BaseSubscription',
     'Resource',
     'ResourceEventChange',
 ]
@@ -196,6 +195,8 @@ class Company(BaseModel):
         verbose_name = _("Company")
         verbose_name_plural = _("Companies")
 
+    def __str__(self):
+        return self.name
 
 class Tag(BaseModel):
     """Cloud Tags"""
@@ -243,55 +244,6 @@ class Tag(BaseModel):
         ordering = ['name']
 
 
-class BaseSubscription(BaseModel):
-    """Base for Subscription Model"""
-
-    subscription_id = models.CharField(
-        unique=True,
-        max_length=1024
-    )
-
-    slug = AutoSlugField(
-        max_length=1024,
-        populate_from=['subscription_id'],
-        overwrite=True,
-        unique=True
-    )
-
-    name = models.CharField(max_length=255)
-
-    company = models.ForeignKey(
-        Company, on_delete=models.CASCADE,
-        related_name="%(app_label)s_%(class)s_related",
-        related_query_name="%(app_label)s_%(class)ss"
-    )
-
-    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
-
-    # TODO: ? owners = models.ForeignKey(Group, on_delete=models.PROTECT)
-
-    # TODO: ? users = models.ForeignKey(Group, on_delete=models.PROTECT)
-
-    active = models.BooleanField(default=True)
-
-    @property
-    def company_name(self):
-        return self.company.name
-
-    @property
-    def provider_name(self):
-        return self.provider.name
-
-    def get_auth(self):
-        raise NotImplementedError()
-
-    def __str__(self):
-        return f"{self.provider.name} - {self.name}"
-    
-    class Meta:
-        abstract = True
-
-
 class Resource(BaseModel):
     """Generic Resource"""
 
@@ -318,9 +270,9 @@ class Resource(BaseModel):
 
     #changes = GenericRelation('ResourceEventChange', related_query_name='resource')
 
-    locked = models.BooleanField(default=False)
+    locked = models.BooleanField(default=False, editable=False)
 
-    active = models.BooleanField(default=True)
+    active = models.BooleanField(default=True, editable=False)
 
     #categories = TaggableManager()
 

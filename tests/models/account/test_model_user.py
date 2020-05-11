@@ -21,7 +21,7 @@ def test_user_success(mce_app_company):
     assert user.is_service is False
 
     assert not user.api_token_key is None
-    assert not user.profile is None
+    # assert not user.profile is None
 
     #print("!!! : ", user.to_dict())
 

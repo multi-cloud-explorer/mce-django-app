@@ -100,28 +100,26 @@ def mce_app_region_azure(mce_app_provider_azure):
 
 # --- django.contrib.auth : Group
 
-@pytest.fixture
-def mce_app_company_group_admins():
-    return Group.objects.create(name="my_company_Admins")
-
-@pytest.fixture
-def mce_app_company_group_users():
-    return Group.objects.create(name="my_company_Users")
-
-@pytest.fixture
-def mce_app_company2_group_admins2():
-    return Group.objects.create(name="my_company2_Admins")
-
-@pytest.fixture
-def mce_app_company2_group_users2():
-    return Group.objects.create(name="my_company2_Users")
+# @pytest.fixture
+# def mce_app_company_group_admins():
+#     return Group.objects.create(name="my_company_Admins")
+#
+# @pytest.fixture
+# def mce_app_company_group_users():
+#     return Group.objects.create(name="my_company_Users")
+#
+# @pytest.fixture
+# def mce_app_company2_group_admins2():
+#     return Group.objects.create(name="my_company2_Admins")
+#
+# @pytest.fixture
+# def mce_app_company2_group_users2():
+#     return Group.objects.create(name="my_company2_Users")
 
 # --- common : Company
 
 @pytest.fixture
 def mce_app_company(
-        mce_app_company_group_admins,
-        mce_app_company_group_users,
         mce_app_provider_all,
         mce_app_region,
     ):
@@ -138,8 +136,6 @@ def mce_app_company(
 
 @pytest.fixture
 def mce_app_company2(
-        mce_app_company2_group_admins2,
-        mce_app_company2_group_users2,
         mce_app_provider_all,
         mce_app_region,
     ):
@@ -157,17 +153,17 @@ def mce_app_company2(
 # --- account : User
 
 @pytest.fixture
-def mce_app_user_with_company(mce_app_company, mce_app_company_group_admins):
+def mce_app_user_with_company(mce_app_company):
     """Admin user for company"""
 
-    obj = USER_MODEL.objects.create(
-        username="user1",
-        email="user1@localhost.net",
+    return USER_MODEL.objects.create_user(
+        username="company_user_1",
+        email="company_user_1@localhost.net",
         company=mce_app_company,
-        role=constants.UserRole.OWNER
+        role=constants.UserRole.OWNER,
+        password="password",
+        is_staff=True
     )
-    #obj.groups.add(mce_app_company_group_admins)
-    return obj
 
 
 @pytest.fixture
@@ -176,39 +172,49 @@ def mce_app_user_admin(mce_app_user_with_company):
 
 
 @pytest.fixture
-def mce_app_user_user(mce_app_company, mce_app_company_group_users):
+def mce_app_user_user(mce_app_company):
     """Normal user for company"""
-    obj = USER_MODEL.objects.create(
+
+    return USER_MODEL.objects.create_user(
         username="company_user_2",
         email="company_user_2@localhost.net",
         company=mce_app_company,
-        role=constants.UserRole.USER
+        role=constants.UserRole.USER,
+        password="password",
+        is_staff=True
     )
-    #obj.groups.add(mce_app_company_group_users)
-    return obj
 
 
 @pytest.fixture
 def mce_app_user_without_company():
-    return USER_MODEL.objects.create(username="user2", email="user2@localhost.net")
+
+    return USER_MODEL.objects.create_user(
+        username="user3",
+        email="user3@localhost.net",
+        password="password",
+        is_staff=True
+    )
 
 
 @pytest.fixture
-def mce_app_user_with_other_company(mce_app_company2, mce_app_company2_group_admins2):
+def mce_app_user_with_other_company(mce_app_company2):
     """Admin user for company"""
-    # Token
-    obj = USER_MODEL.objects.create(
+
+    return USER_MODEL.objects.create_user(
         username="user_company2",
         email="user_company2@localhost.net",
         company=mce_app_company2,
-        role=constants.UserRole.USER
+        role=constants.UserRole.USER,
+        password="password",
+        is_staff=True
     )
-    #obj.groups.add(mce_app_company2_group_admins2)
-    return obj
+
 
 @pytest.fixture
-def mce_app_service_user(mce_app_company, mce_app_company_group_users):
+def mce_app_service_user(mce_app_company):
     """Service user for company"""
+
+    # not create_user() function because no password
     obj = USER_MODEL.objects.create(
         username="company_user_service",
         email="company_user_service@localhost.net",
@@ -276,8 +282,8 @@ def mce_app_tag(mce_app_company, mce_app_provider):
     return common.Tag.objects.create(
         company=mce_app_company,
         provider=mce_app_provider,
-        name="ms-resource-usage",
-        value="azure-cloud-shell"
+        name="key1",
+        value="value1"
     )
 
 

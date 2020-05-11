@@ -1,55 +1,41 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 
-from .models import SubscriptionAWS, ResourceAWS
+from mce_django_app import perms
+from mce_django_app.models import aws as models
+from .base import BaseModelAdmin, ReadOnlyModelAdminMixIn, BaseModelAdminWithCompanyFieldMixin
 
 
-@admin.register(SubscriptionAWS)
-class SubscriptionAWSAdmin(admin.ModelAdmin):
-    list_display = (
-        'id',
-        'created',
-        'updated',
-        'subscription_id',
+@admin.register(models.SubscriptionAWS)
+class SubscriptionAWSAdmin(BaseModelAdminWithCompanyFieldMixin, BaseModelAdmin):
+    PERMS = perms.SubscriptionAWSPermissions
+    list_display = ['subscription_id', 'name', 'company_name']
+    list_filter = ['company__name']
+    search_fields = ['name']
+    list_select_related = ['company', 'provider']
+
+
+@admin.register(models.ResourceAWS)
+class ResourceAWSAdmin(BaseModelAdminWithCompanyFieldMixin, ReadOnlyModelAdminMixIn, BaseModelAdmin):
+    PERMS = perms.ResourceAWSPermissions
+    list_display = [
         'name',
-        'company',
-        'provider',
-        'active',
-        'default_region',
-        'username',
-        'password',
-        'assume_role',
-    )
-    list_filter = ('created', 'updated', 'company', 'provider', 'active')
-    search_fields = ('name',)
-
-
-@admin.register(ResourceAWS)
-class ResourceAWSAdmin(admin.ModelAdmin):
-    list_display = (
-        'id',
-        'created',
-        'updated',
-        'resource_id',
-        'slug',
-        'name',
-        'provider',
+        'resource_type_name',  # TODO: faire lien html vers le type
+        'company_name',
+        'subscription_name',
+        'region_name',
+    ]
+    list_filter = [
+        'company__name',
+        'region__name',
+        'subscription__name',
+        'subscription__subscription_id',
+    ]
+    list_select_related = [
         'resource_type',
         'company',
-        'metas',
-        'locked',
-        'active',
         'subscription',
-    )
-    list_filter = (
-        'created',
-        'updated',
-        'provider',
-        'resource_type',
-        'company',
-        'locked',
-        'active',
-        'subscription',
-    )
+        'region'
+    ]
     search_fields = ('slug', 'name')
     prepopulated_fields = {'slug': ['name']}
