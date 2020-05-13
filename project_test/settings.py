@@ -3,6 +3,7 @@ import tempfile
 
 import environ
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse_lazy
 
 env = environ.Env(DEBUG=(bool, False))
 
@@ -280,3 +281,50 @@ MCE_CHANGES_ENABLE = False
 #     "ENABLE_STACKTRACES": True,
 #     "ENABLE_STACKTRACES_LOCALS": True
 # }
+
+SWAGGER_SETTINGS = {
+    'LOGIN_URL': reverse_lazy('admin:login'),
+    #'LOGOUT_URL': '/admin/logout',
+    'PERSIST_AUTH': True,
+    'REFETCH_SCHEMA_WITH_AUTH': True,
+    'REFETCH_SCHEMA_ON_LOGOUT': True,
+
+    'DEFAULT_INFO': 'mce_django_app.api.urls.swagger_info',
+
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'in': 'header',
+            'name': 'Authorization',
+            'type': 'apiKey',
+        },
+        #'OAuth2 password': {
+        #    'flow': 'password',
+        #    'scopes': {
+        #        'read': 'Read everything.',
+        #        'write': 'Write everything,',
+        #    },
+        #    'tokenUrl': OAUTH2_TOKEN_URL,
+        #    'type': 'oauth2',
+        #},
+        'Query': {
+            'in': 'query',
+            'name': 'auth',
+            'type': 'apiKey',
+        },
+    },
+    #'OAUTH2_REDIRECT_URL': OAUTH2_REDIRECT_URL,
+    #'OAUTH2_CONFIG': {
+    #    'clientId': OAUTH2_CLIENT_ID,
+    #    'clientSecret': OAUTH2_CLIENT_SECRET,
+    #    'appName': OAUTH2_APP_NAME,
+    #},
+    "DEFAULT_PAGINATOR_INSPECTORS": [
+        #'testproj.inspectors.UnknownPaginatorInspector',
+        'drf_yasg.inspectors.DjangoRestResponsePagination',
+        'drf_yasg.inspectors.CoreAPICompatInspector',
+    ]
+}
+
+REDOC_SETTINGS = {
+    'SPEC_URL': ('schema-json', {'format': '.json'}),
+}
