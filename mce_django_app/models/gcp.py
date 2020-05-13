@@ -37,17 +37,25 @@ class ProjectGCP(BaseModel):
     # project_id = str = 'mce-labo'
     # scopes ?
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(
+        max_length=255,
+        null=True  # FIXME: remove
+    )
 
     project_id = models.CharField(max_length=255, unique=True, verbose_name=_("Project ID"))
 
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE,
         related_name="%(app_label)s_%(class)s_related",
-        related_query_name="%(app_label)s_%(class)ss"
+        related_query_name="%(app_label)s_%(class)ss",
+        null=True # FIXME: remove
     )
 
-    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
+    provider = models.ForeignKey(
+        Provider,
+        on_delete=models.PROTECT,
+        default=constants.Provider.GCP
+    )
 
     credentials = JSONField(default={}, null=True, blank=True)
 

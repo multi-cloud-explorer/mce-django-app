@@ -12,7 +12,7 @@ from mce_django_app import utils
 from mce_django_app import constants
 from mce_django_app import signals
 
-from .common import BaseModel, Resource, Company, ResourceEventChange
+from .common import BaseModel, Resource, Company, Provider, ResourceEventChange
 
 __all__ = [
     'Vcenter',
@@ -35,6 +35,8 @@ class Vcenter(BaseModel):
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE,
     )
+
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT, default=constants.Provider.VMWARE)
 
     # FIXME: encrypt(
     url = models.URLField(
@@ -60,12 +62,6 @@ class DatacenterVMware(Resource):
     vcenter = models.ForeignKey(
         Vcenter, on_delete=models.CASCADE)
 
-    # class Meta:
-    #     constraints = [
-    #         models.UniqueConstraint(
-    #             fields=["vcenter", "name"], name='vcenter_name_uniq'
-    #         ),
-    #     ]
     @property
     def vcenter_name(self):
         return self.vcenter.name

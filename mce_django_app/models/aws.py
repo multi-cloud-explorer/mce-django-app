@@ -43,7 +43,7 @@ class SubscriptionAWS(BaseModel):
         related_query_name="%(app_label)s_%(class)ss"
     )
 
-    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT, default=constants.Provider.AWS)
 
     active = models.BooleanField(default=True)
 
@@ -64,10 +64,11 @@ class SubscriptionAWS(BaseModel):
         """Auth format for `mce_lib_aws.???`"""
 
         data = dict(
-            subscription_id=self.subscription_id,
-            user=self.username,
-            password=self.password,
-            assume_role=self.assume_role,
+            #account_id=self.subscription_id,
+            region_name=self.default_region,
+            aws_access_key_id=self.username,
+            aws_secret_access_key=self.password,
+            #delegation_role_name=self.assume_role,
         )
         return data
 
@@ -89,7 +90,11 @@ class SubscriptionAWS(BaseModel):
 
 class ResourceAWS(Resource):
 
-    region = models.ForeignKey(Region, on_delete=models.PROTECT)
+    region = models.ForeignKey(
+        Region,
+        on_delete=models.PROTECT,
+        null=True  # FIXME: remove
+    )
 
     subscription = models.ForeignKey(SubscriptionAWS, on_delete=models.PROTECT)
 

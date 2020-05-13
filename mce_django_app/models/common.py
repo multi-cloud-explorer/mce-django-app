@@ -176,20 +176,6 @@ class Company(BaseModel):
 
     resource_types = models.ManyToManyField(ResourceType)
 
-    # owner_group = models.ForeignKey(
-    #     Group,
-    #     on_delete=models.PROTECT,
-    #     related_name="company_owners",
-    #     null=True, blank=True
-    # )
-    #
-    # user_group = models.ForeignKey(
-    #     Group,
-    #     on_delete=models.PROTECT,
-    #     related_name="company_users",
-    #     null=True, blank=True
-    # )
-
     class Meta:
         ordering = ['name']
         verbose_name = _("Company")

@@ -45,7 +45,7 @@ class SubscriptionAzure(BaseModel):
         related_query_name="%(app_label)s_%(class)ss"
     )
 
-    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT, default=constants.Provider.AZURE)
 
     active = models.BooleanField(default=True)
 
