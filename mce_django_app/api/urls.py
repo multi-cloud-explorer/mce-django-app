@@ -7,17 +7,19 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+swagger_info = openapi.Info(
+    title="Multi-Cloud-Explorer API",
+    default_version='v1',
+    description="Multi-Cloud-Explorer API Documentation",
+    # terms_of_service="https://www.google.com/policies/terms/",
+    # contact=openapi.Contact(email="contact@snippets.local"),
+    # license=openapi.License(name="BSD License"),
+)
+
 schema_view = get_schema_view(
-   openapi.Info(
-      title="Multi-Cloud-Explorer API",
-      default_version='v1',
-      description="Multi-Cloud-Explorer API Documentation",
-      #terms_of_service="https://www.google.com/policies/terms/",
-      #contact=openapi.Contact(email="contact@snippets.local"),
-      #license=openapi.License(name="BSD License"),
-   ),
-   public=False,
-   permission_classes=(permissions.IsAuthenticated,),
+    swagger_info,
+    public=False,
+    permission_classes=(permissions.IsAuthenticated,),
 )
 
 urlpatterns = [
