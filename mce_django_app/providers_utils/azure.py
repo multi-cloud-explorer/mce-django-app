@@ -420,11 +420,11 @@ def sync_resource_list(
         if location in regions:
             region = regions[location]
         else:
-            region = Region.objects.filter(name=resource['location'], provider=provider).first()
+            region = Region.objects.filter(name=location, provider=provider).first()
 
         if not region:
             _errors += 1
-            msg = f"region not found [{resource['location']}] - bypass resource [{resource_id}]"
+            msg = f"region not found [{location}] - bypass resource [{resource_id}]"
             logger.error(msg)
             continue
 
@@ -460,6 +460,7 @@ def sync_resource_list(
                 resource_id=resource_id,
                 resource_type=resource.get('type'),
                 subscription=subscription,
+                resource_group=resource_group,
                 region=region,
                 session=session,
                 disable_changes=disable_changes
