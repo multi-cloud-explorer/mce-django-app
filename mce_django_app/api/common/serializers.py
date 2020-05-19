@@ -23,17 +23,33 @@ class ResourceTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CompanySerializer(serializers.ModelSerializer):
-    # SlugRelatedField
-    providers = serializers.HyperlinkedIdentityField(
+class SyncSettingsSerializer(serializers.ModelSerializer):
+
+    include_providers = serializers.HyperlinkedIdentityField(
+        view_name="common:provider-detail",
+        many=True,
+        read_only=True
+    )
+    exclude_providers = serializers.HyperlinkedIdentityField(
         view_name="common:provider-detail",
         many=True,
         read_only=True
     )
 
-    regions = RegionSerializer(many=True, read_only=True)
+    include_regions = RegionSerializer(many=True, read_only=True)
+    exclude_regions = RegionSerializer(many=True, read_only=True)
 
-    resource_types = RegionSerializer(many=True, read_only=True)
+    include_resource_types = RegionSerializer(many=True, read_only=True)
+    exclude_resource_types = RegionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = models.SyncSettings
+        fields = '__all__'
+
+
+class CompanySerializer(serializers.ModelSerializer):
+
+    # TODO: settings
 
     class Meta:
         model = models.Company

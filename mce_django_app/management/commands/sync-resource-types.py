@@ -32,5 +32,5 @@ class Command(BaseCommand):
         self._sync_azure()
         self._sync_vsphere()
         self._sync_aws()
-        self._sync_gcp()
+        # TODO: self._sync_gcp()
 

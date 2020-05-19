@@ -1,9 +1,6 @@
 import pytest
 
-#from guardian.shortcuts import assign_perm, get_perms, get_objects_for_user, get_objects_for_group
 from django.core.exceptions import ValidationError
-
-#get_group_perms
 
 from mce_django_app.models import common as models
 

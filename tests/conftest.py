@@ -16,6 +16,14 @@ def set_default_lang(settings):
     settings.LANGUAGE_CODE = 'en'
     settings.REST_FRAMEWORK['PAGE_SIZE'] = 5
 
+    settings.CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+        }
+    }
+
+
 class MockResponse:
     """
     from unittest.mock import patch

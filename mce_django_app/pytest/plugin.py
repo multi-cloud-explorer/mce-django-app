@@ -9,7 +9,6 @@ from ddf import G, M
 from freezegun import freeze_time
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-#from guardian.shortcuts import assign_perm
 
 pytestmark = pytest.mark.django_db(transaction=True, reset_sequences=True)
 
@@ -19,12 +18,6 @@ from mce_django_app.models import azure
 from mce_django_app.models import vsphere
 from mce_django_app.models import aws
 #from mce_django_app.models import gcp
-
-"""
-Microsoft.Resources/resourceGroups
-Microsoft.ClassicCompute/virtualMachines
-Microsoft.Sql/servers/databases
-"""
 
 USER_MODEL = get_user_model()
 
@@ -116,39 +109,41 @@ def mce_app_region_azure(mce_app_provider_azure):
 # def mce_app_company2_group_users2():
 #     return Group.objects.create(name="my_company2_Users")
 
+
+# --- common: SyncSettings
+
+@pytest.fixture
+def mce_app_syncsettings(mce_app_provider_all, mce_app_region):
+
+    settings = common.SyncSettings.objects.create(
+        name="test",
+        inventory_mode=constants.InventoryMode.PULL,
+        delete_mode=constants.DeleteMode.DISABLE,
+        #include_resource_types
+    )
+    settings.include_providers.set(mce_app_provider_all)
+    settings.include_regions.set([mce_app_region])
+
+    return settings
+
+
 # --- common : Company
 
 @pytest.fixture
-def mce_app_company(
-        mce_app_provider_all,
-        mce_app_region,
-    ):
+def mce_app_company(mce_app_syncsettings):
 
-    obj = common.Company.objects.create(
+    return common.Company.objects.create(
         name="my-company",
-        # owner_group=mce_app_company_group_admins,
-        # user_group=mce_app_company_group_users
+        settings=mce_app_syncsettings
     )
-    obj.providers.set(mce_app_provider_all)
-    obj.regions.add(mce_app_region)
-
-    return obj
 
 @pytest.fixture
-def mce_app_company2(
-        mce_app_provider_all,
-        mce_app_region,
-    ):
+def mce_app_company2(mce_app_syncsettings):
 
-    obj = common.Company.objects.create(
+    return common.Company.objects.create(
         name="my-company2",
-        # owner_group=mce_app_company2_group_admins2,
-        # user_group=mce_app_company2_group_users2
+        settings=mce_app_syncsettings
     )
-    obj.providers.set(mce_app_provider_all)
-    obj.regions.add(mce_app_region)
-
-    return obj
 
 # --- account : User
 
@@ -318,11 +313,12 @@ def mce_app_resource(mce_app_resource_type, mce_app_company):
 # -- Vmware Vsphere
 
 @pytest.fixture
-def mce_app_vsphere_vcenter(mce_app_company):
+def mce_app_vsphere_vcenter(mce_app_company, mce_app_provider_vmware):
     return vsphere.Vcenter.objects.create(
         name="Vcenter1",
         url="https://labo.net?username=user&password=pass",
-        company=mce_app_company
+        company=mce_app_company,
+        provider=mce_app_provider_vmware
     )
 
 @pytest.fixture

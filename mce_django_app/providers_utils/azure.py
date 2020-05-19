@@ -3,6 +3,7 @@ from typing import Dict, List
 
 import requests
 from django.conf import settings
+from django.db.models import Q
 
 from mce_azure.utils import get_access_token
 from mce_azure import core as cli
@@ -52,6 +53,39 @@ def sync_regions() -> Dict:
 
     return dict(errors=0, created=_created, updated=_updated, deleted=0)
 
+
+def sync_subscription_regions(subscription_id: str, access_token: str = None) -> Dict:
+    """Azure Region for Subscription Sync"""
+
+    _created = 0
+    _updated = 0
+
+    provider = Provider.objects.get(name=constants.Provider.AZURE)
+
+    if access_token:
+        session = cli.get_session(access_token)
+    else:
+        _, session = get_subscription_and_session(subscription_id)
+
+    for region in cli.get_regions_list(subscription_id, session=session):
+        _, created = Region.objects.get_or_create(
+            name=region['name'], provider=provider,
+            defaults=dict(
+                display_name=region.get('displayName'),
+                longitude=float(region.get('longitude')),
+                latitude=float(region.get('latitude'))
+            )
+        )
+        if created:
+            _created += 1
+        else:
+            _updated += 1
+
+    logger.info(f"sync - azure - Region - created[{_created}]- updated[{_updated}]")
+
+    return dict(errors=0, created=_created, updated=_updated, deleted=0)
+
+
 def sync_resource_type(max_limit: int = None) -> Dict:
     """Azure ResourceType Sync"""
 
@@ -79,7 +113,7 @@ def sync_resource_type(max_limit: int = None) -> Dict:
 
     return dict(errors=0, created=_created, updated=_updated, deleted=0)
 
-def get_subscription_and_session(subscription_id: str):
+def get_subscription_and_session(subscription_id: str, timeout: float = None):
     """
 
     Args:
@@ -92,20 +126,34 @@ def get_subscription_and_session(subscription_id: str):
     # TODO: raise if active=False
     subscription = models.SubscriptionAzure.objects.get(subscription_id=subscription_id)
     auth = subscription.get_auth()
-    token = get_access_token(**auth)
+    token = get_access_token(timeout=timeout, **auth)
     session = cli.get_session(token=token['access_token'])
     return subscription, session
 
-def sync_resource_group(subscription_id: str, resources_groups: List = None, max_error: int = None, disable_changes: bool = False) -> Dict:
+# Passer access_token à tous
+
+def sync_resource_group(
+    subscription_id: str,
+    resources_groups: List = None,
+    max_error: int = None,
+    disable_changes: bool = False,
+    disable_delete: bool = False,
+    access_token: str = None,
+    timeout: float = None) -> Dict:
 
     # TODO: catch error
-    subscription, session = get_subscription_and_session(subscription_id)
+    if access_token:
+        session = cli.get_session(access_token)
+        subscription = models.SubscriptionAzure.objects.get(subscription_id=subscription_id)
+    else:
+        subscription, session = get_subscription_and_session(subscription_id)
+
     company = subscription.company
     provider = Provider.objects.get(name=constants.Provider.AZURE)
 
     # TODO: catch error
     if not resources_groups:
-        resources_groups = cli.get_resourcegroups_list(subscription_id, session=session)
+        resources_groups = cli.get_resourcegroups_list(subscription_id, session=session, timeout=timeout)
 
     _created = 0
     _updated = 0
@@ -122,8 +170,7 @@ def sync_resource_group(subscription_id: str, resources_groups: List = None, max
 
         resource_id = r['id'].lower()
         found_ids.append(resource_id)
-
-        region = Region.objects.filter(name=r['location'], provider=provider).first()
+        region = Region.objects.filter(provider=provider).filter(Q(name=r['location']) | Q(display_name=r['location'])).first()
         if not region:
             _errors += 1
             msg = f"region not found [{r['location']}] - bypass resource [{resource_id}]"
@@ -141,7 +188,6 @@ def sync_resource_group(subscription_id: str, resources_groups: List = None, max
 
         # TODO: ajouter autres champs ?
         metas = r.get('properties', {})
-        print('!!! sources metas : ', metas)
         assert isinstance(metas, dict) is True
 
         tags_objects = []
@@ -191,25 +237,26 @@ def sync_resource_group(subscription_id: str, resources_groups: List = None, max
                 _updated += 1
 
     logger.info(
-        "sync - azure - ResourceAzure - _errors[%s] - created[%s]- updated[%s]"
+        "sync - azure - ResourceAzure Group - _errors[%s] - created[%s]- updated[%s]"
         % (_errors, _created, _updated)
     )
 
-    # Create events delete
-    qs = models.ResourceAzure.objects.exclude(
-        resource_id__in=found_ids, subscription=subscription
-    )
-    # TODO: CHANGES_MODES: CREATE/UPDATE/DELETE
-    if not disable_changes and getattr(settings, "MCE_CHANGES_ENABLE", False):
-        ResourceEventChange.create_event_change_delete(qs)
+    if not disable_delete:
 
-    # Mark for deleted
-    # TODO: delegate tasks ?
-    _deleted, objects = models.ResourceAzure.objects.exclude(
-        resource_id__in=found_ids, subscription=subscription
-    ).delete()
+        # Create events delete
+        qs = models.ResourceAzure.objects.filter(resource_group__isnull=True).exclude(
+            resource_id__in=found_ids, subscription=subscription
+        )
+        # TODO: CHANGES_MODES: CREATE/UPDATE/DELETE
+        if not disable_changes and getattr(settings, "MCE_CHANGES_ENABLE", False):
+            ResourceEventChange.create_event_change_delete(qs)
 
-    logger.info(f"mark for deleted. [{_deleted}] old ResourceAzure")
+        # Mark for deleted
+        # TODO: delegate tasks ?
+        _deleted, objects = qs.delete()
+        # FIXME: _deleted = nombre total d'entrée avec cascade !!!
+        print("deleted objects : %s" % objects)
+        logger.info(f"mark for deleted. [{_deleted}] old ResourceAzure Group and dependencies")
 
     return dict(errors=_errors, created=_created, updated=_updated, deleted=_deleted)
 
@@ -222,7 +269,9 @@ def sync_resource(
         region: Region = None,
         subscription: models.SubscriptionAzure = None,
         session: requests.Session = None,
-        disable_changes: bool = False) -> Dict:
+        access_token: str = None,
+        disable_changes: bool = False,
+        timeout: float = None) -> Dict:
     """Synchronize a `models.ResourceAzure` with database.
 
     Args:
@@ -258,7 +307,11 @@ def sync_resource(
     # TODO: récupérer le token de session ?: session.headers.get('authorization')
     # TODO: exception
     if not subscription or not session:
-        subscription, session = get_subscription_and_session(subscription_id)
+        if access_token:
+            session = cli.get_session(access_token)
+            subscription = models.SubscriptionAzure.objects.get(subscription_id=subscription_id)
+        else:
+            subscription, session = get_subscription_and_session(subscription_id)
 
     company = subscription.company
 
@@ -277,6 +330,7 @@ def sync_resource(
         logger.error(msg)
         raise ResourceTypeNotFound(msg)
 
+    # Microsoft.Automation/automationAccounts
     if _type.exclude_sync:
         msg = f"resource type [{resource_type}] disabled for synchronize - resource [{resource_id}]"
         logger.error(msg)
@@ -298,7 +352,7 @@ def sync_resource(
 
     if not resource:
         try:
-            resource = cli.get_resource_by_id(resource_id, session=session)
+            resource = cli.get_resource_by_id(resource_id, session=session, timeout=timeout)
         except Exception as err:
             msg = f"fetch resource {resource_id} error : {err}"
             logger.exception(msg)
@@ -377,21 +431,29 @@ def sync_resource_list(
         resources: List = None,
         subscription: models.SubscriptionAzure = None,
         session: requests.Session = None,
+        access_token: str = None,
         disable_changes: bool = False,
-        disable_delete: bool = False) -> Dict:
+        disable_delete: bool = False,
+        timeout: float = None) -> Dict:
 
     provider = Provider.objects.filter(name=constants.Provider.AZURE).first()
     if not provider:
         raise ProviderNotFound(f"Provider not found : {constants.Provider.AZURE}")
 
-    if subscription_id and not subscription:
-        raise  AttributeError("subscription_id or subscription is require")
+    if not subscription_id and not subscription:
+        raise AttributeError("subscription_id or subscription is require")
 
     if not subscription or not session:
         # TODO: catch error
-        subscription, session = get_subscription_and_session(subscription_id)
+        if access_token:
+            session = cli.get_session(access_token)
+            subscription = models.SubscriptionAzure.objects.get(subscription_id=subscription_id)
+        else:
+            subscription, session = get_subscription_and_session(subscription_id)
 
     company = subscription.company
+    # TODO: include company.resource_types
+    # TODO: include company.regions
 
     _created = 0
     _updated = 0
@@ -403,7 +465,7 @@ def sync_resource_list(
     resource_groups = {}
 
     if not resources:
-        resources = cli.get_resources_list(subscription_id, session)
+        resources = cli.get_resources_list(subscription_id, session, timeout=timeout)
 
     for i, resource in enumerate(resources):
 
@@ -463,6 +525,7 @@ def sync_resource_list(
                 resource_group=resource_group,
                 region=region,
                 session=session,
+                access_token=access_token,
                 disable_changes=disable_changes
             )
             if result["created"]:
@@ -476,17 +539,15 @@ def sync_resource_list(
 
     if not disable_delete:
         # Create events delete
-        qs = models.ResourceAzure.objects.exclude(
-            resource_id__in=found_ids, subscription=subscription
+        qs = models.ResourceAzure.objects.filter(subscription=subscription, resource_group__isnull=False).exclude(
+            resource_id__in=found_ids
         )
         if not disable_changes and getattr(settings, "MCE_CHANGES_ENABLE", False):
             ResourceEventChange.create_event_change_delete(qs)
 
-        qs = models.ResourceAzure.objects.exclude(
-            resource_id__in=found_ids, subscription=subscription
-        )
         _deleted, objects = qs.delete()
-
-        logger.info("[%s] old ResourceAzure deleted" % _deleted)
+        print("deleted objects : %s" % objects)
+        # FIXME: _deleted = nombre total d'entrée avec cascade !!!
+        logger.info("[%s] old ResourceAzure and dependencies deleted" % _deleted)
 
     return dict(errors=_errors, created=_created, updated=_updated, deleted=_deleted)

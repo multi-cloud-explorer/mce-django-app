@@ -11,7 +11,7 @@ from mce_django_app import utils
 from mce_django_app import constants
 from mce_django_app import signals
 
-from mce_django_app.models.common import BaseModel, Resource, Company, Provider
+from mce_django_app.models.common import BaseModel, Resource, Company, Provider, SyncSettings
 
 """
 from mptt.models import MPTTModel, TreeForeignKey
@@ -27,6 +27,8 @@ class FolderGCP(BaseModel):
 class ProjectGCP(BaseModel):
     """GCP Project Model"""
 
+    # TODO: Region ?
+
     # name: str
     # full_name: str
     # labels: {}
@@ -39,7 +41,6 @@ class ProjectGCP(BaseModel):
 
     name = models.CharField(
         max_length=255,
-        null=True  # FIXME: remove
     )
 
     project_id = models.CharField(max_length=255, unique=True, verbose_name=_("Project ID"))
@@ -48,13 +49,13 @@ class ProjectGCP(BaseModel):
         Company, on_delete=models.CASCADE,
         related_name="%(app_label)s_%(class)s_related",
         related_query_name="%(app_label)s_%(class)ss",
-        null=True # FIXME: remove
     )
+
+    settings = models.ForeignKey(SyncSettings, null=True, blank=True, on_delete=models.SET_NULL)
 
     provider = models.ForeignKey(
         Provider,
         on_delete=models.PROTECT,
-        default=constants.Provider.GCP
     )
 
     credentials = JSONField(default={}, null=True, blank=True)

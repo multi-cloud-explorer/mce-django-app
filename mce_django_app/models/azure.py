@@ -14,7 +14,7 @@ from mce_django_app import constants
 from mce_django_app import signals
 
 from mce_django_app.models.common import (
-    BaseModel, Resource, Region, Provider, Company)
+    BaseModel, Resource, Region, Provider, Company, SyncSettings)
 
 __all__ = [
     'SubscriptionAzure',
@@ -45,7 +45,9 @@ class SubscriptionAzure(BaseModel):
         related_query_name="%(app_label)s_%(class)ss"
     )
 
-    provider = models.ForeignKey(Provider, on_delete=models.PROTECT, default=constants.Provider.AZURE)
+    settings = models.ForeignKey(SyncSettings, null=True, blank=True, on_delete=models.SET_NULL)
+
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
 
     active = models.BooleanField(default=True)
 

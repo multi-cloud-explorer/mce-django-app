@@ -56,9 +56,11 @@ class CompanyAdmin(BaseModelAdmin):
     def get_queryset(self, request):
         qs = self.model._default_manager.get_queryset()
 
-        if not request.user.company:
+        if request.user.is_superuser:
+            pass
+        elif not request.user.company:
             qs = qs.none()
-        elif not request.user.is_superuser:
+        else:
             qs = qs.filter(pk=request.user.company.pk)
 
         ordering = self.get_ordering(request)

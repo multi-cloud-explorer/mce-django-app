@@ -116,6 +116,8 @@ class TagViewSet(WithCompanyFieldMixin, viewsets.ModelViewSet):
 
 class ResourceViewSet(WithCompanyFieldMixin, DestroyModelMixin, viewsets.ModelViewSet):
 
+    # TODO: read only !
+
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
     queryset = models.Resource.objects.all().order_by('-created')

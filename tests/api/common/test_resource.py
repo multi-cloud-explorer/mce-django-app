@@ -129,7 +129,7 @@ def test_crud_without_permissions(admin_user, api_client, mce_app_company, mce_a
             #'created': '2019-01-01T00:00:00Z',
             'id': 1,
             'locked': False,
-            'metas': "{'key1': 'value1'}",
+            'metas': {'key1': 'value1'},
             'name': 'myname',
             'provider': 'http://testserver/mce/api/v1/common/provider/1/',
             'resource_id': 'x1',

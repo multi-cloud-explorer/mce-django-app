@@ -12,7 +12,7 @@ from mce_django_app import utils
 from mce_django_app import constants
 from mce_django_app import signals
 
-from .common import BaseModel, Resource, Company, Provider, ResourceEventChange
+from .common import BaseModel, Resource, Company, Provider, ResourceEventChange, SyncSettings
 
 __all__ = [
     'Vcenter',
@@ -36,7 +36,9 @@ class Vcenter(BaseModel):
         Company, on_delete=models.CASCADE,
     )
 
-    provider = models.ForeignKey(Provider, on_delete=models.PROTECT, default=constants.Provider.VMWARE)
+    settings = models.ForeignKey(SyncSettings, null=True, blank=True, on_delete=models.SET_NULL)
+
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
 
     # FIXME: encrypt(
     url = models.URLField(
@@ -48,6 +50,15 @@ class Vcenter(BaseModel):
     @property
     def company_name(self):
         return self.company.name
+
+    @property
+    def provider_name(self):
+        return self.provider.name
+
+    @property
+    def settings_name(self):
+        if self.settings:
+            return self.settings.name
 
     def get_auth(self):
         """Auth format for `mce_lib_vsphere.core.Client`"""

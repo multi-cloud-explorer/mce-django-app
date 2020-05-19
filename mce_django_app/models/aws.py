@@ -12,7 +12,7 @@ from mce_django_app import utils
 from mce_django_app import constants
 from mce_django_app import signals
 
-from mce_django_app.models.common import BaseModel, Resource, Provider, Region, Company
+from mce_django_app.models.common import BaseModel, Resource, Provider, Region, Company, SyncSettings
 
 __all__ = [
     'SubscriptionAWS',
@@ -43,7 +43,9 @@ class SubscriptionAWS(BaseModel):
         related_query_name="%(app_label)s_%(class)ss"
     )
 
-    provider = models.ForeignKey(Provider, on_delete=models.PROTECT, default=constants.Provider.AWS)
+    settings = models.ForeignKey(SyncSettings, null=True, blank=True, on_delete=models.SET_NULL)
+
+    provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
 
     active = models.BooleanField(default=True)
 
@@ -64,11 +66,9 @@ class SubscriptionAWS(BaseModel):
         """Auth format for `mce_lib_aws.???`"""
 
         data = dict(
-            #account_id=self.subscription_id,
             region_name=self.default_region,
             aws_access_key_id=self.username,
             aws_secret_access_key=self.password,
-            #delegation_role_name=self.assume_role,
         )
         return data
 
@@ -93,7 +93,6 @@ class ResourceAWS(Resource):
     region = models.ForeignKey(
         Region,
         on_delete=models.PROTECT,
-        null=True  # FIXME: remove
     )
 
     subscription = models.ForeignKey(SubscriptionAWS, on_delete=models.PROTECT)

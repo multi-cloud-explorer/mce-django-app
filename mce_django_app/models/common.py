@@ -27,6 +27,7 @@ __all__ = [
     'BaseModel',
     'Provider',
     'Region',
+    'SyncSettings',
     'Company',
     'Tag',
     'ResourceType',
@@ -95,11 +96,11 @@ class Region(BaseModel):
     provider = models.ForeignKey(Provider, on_delete=models.PROTECT)
 
     # us-east-1
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, db_index=True)
 
     slug = AutoSlugField(populate_from=['name'], overwrite=True, unique=False)
 
-    display_name = models.CharField(max_length=255)
+    display_name = models.CharField(max_length=255, db_index=True)
 
     longitude = models.FloatField(null=True, blank=True)
 
@@ -156,12 +157,14 @@ class ResourceType(BaseModel):
         ordering = ['provider', 'name']
 
 
-class Company(BaseModel):
-    # Settings: timeout, retry, wait interval, tag filters...
+class SyncSettings(BaseModel):
 
     name = models.CharField(max_length=255, unique=True)
 
     slug = AutoSlugField(populate_from=['name'], overwrite=True, unique=True)
+
+    # TODO: clean field pour valider unique si True
+    is_global = models.BooleanField(default=False)
 
     # TODO: en déplaçant champs dans InventorySetting, réutilisable dans Subscription et autres ?
     inventory_mode = models.CharField(
@@ -170,11 +173,39 @@ class Company(BaseModel):
         default=constants.InventoryMode.PULL
     )
 
-    providers = models.ManyToManyField(Provider)
+    delete_mode = models.CharField(
+        max_length=20,
+        choices=constants.DeleteMode.choices,
+        default=constants.DeleteMode.DISABLE
+    )
 
-    regions = models.ManyToManyField(Region)
+    include_providers = models.ManyToManyField(Provider, related_name="syncsettings_include")
+    exclude_providers = models.ManyToManyField(Provider, related_name="syncsettings_exclude")
 
-    resource_types = models.ManyToManyField(ResourceType)
+    include_regions = models.ManyToManyField(Region, related_name="syncsettings_include")
+    exclude_regions = models.ManyToManyField(Region, related_name="syncsettings_exclude")
+
+    include_resource_types = models.ManyToManyField(ResourceType, related_name="syncsettings_include")
+    exclude_resource_types = models.ManyToManyField(ResourceType, related_name="syncsettings_exclude")
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = _("Synchronization Settings")
+        verbose_name_plural = _("Synchronization SyncSettings")
+
+    def __str__(self):
+        return self.name
+
+
+class Company(BaseModel):
+
+    # TODO: Settings: timeout, retry, wait interval, tag filters...
+
+    name = models.CharField(max_length=255, unique=True)
+
+    slug = AutoSlugField(populate_from=['name'], overwrite=True, unique=True)
+
+    settings = models.ForeignKey(SyncSettings, null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ['name']
@@ -184,6 +215,7 @@ class Company(BaseModel):
     def __str__(self):
         return self.name
 
+# TODO: renommer en ResourceTag !
 class Tag(BaseModel):
     """Cloud Tags"""
 

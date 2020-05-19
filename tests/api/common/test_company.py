@@ -22,18 +22,18 @@ def test_crud_without_permissions(admin_user, api_client):
     assert response.status_code == 201
 
     data = response.json()
-    #print(data)
+    print(data)
 
     del data['created']
     assert data == {
         'id': 1,
-        'inventory_mode': 'pull',
+        'settings': None,
+        # 'inventory_mode': 'pull',
+        # 'delete_mode': 'pull',
         'name': 'New Company',
-        #'owner_group': None,
-        #'user_group': None,
-        'providers': [],
-        'regions': [],
-        'resource_types': [],
+        # 'providers': [],
+        # 'regions': [],
+        # 'resource_types': [],
         'slug': 'new-company',
         #'created': '2020-05-09T14:05:16.753573Z',
         'updated': None,
