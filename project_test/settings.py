@@ -28,9 +28,13 @@ INTERNAL_IPS = [
 ]
 
 INSTALLED_APPS = [
+    'django.contrib.contenttypes',
+    'admin_tools',
+    'admin_tools.theming',
+    'admin_tools.menu',
+    'admin_tools.dashboard',
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -55,7 +59,6 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    #'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.google',
 
     "mce_django_app.apps.MceAppConfig",
@@ -82,11 +85,12 @@ ROOT_URLCONF = 'project_test.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        #'DIRS': [
-        #     os.path.join(BASE_DIR, 'templates'),
-        #],
-        'APP_DIRS': True,
+        'DIRS': [
+             os.path.join(BASE_DIR, 'templates'),
+        ],
+        'APP_DIRS': False,
         'OPTIONS': {
+            #'debug': DEBUG,
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
@@ -97,12 +101,11 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
             ],
-            #'loaders': [
-            #    ('django.template.loaders.cached.Loader', [
-            #        'django.template.loaders.filesystem.Loader',
-            #        'django.template.loaders.app_directories.Loader',
-            #    ])
-            #],
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+                'admin_tools.template_loaders.Loader',
+            ],
         },
     },
 ]
@@ -110,11 +113,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'project_test.wsgi.application'
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-    }
+    'default': env.cache(default='redis://127.0.0.1:6379/0')
 }
+
 
 DATABASES = {
     'default': env.db(default='sqlite:////tmp/mce-django-app-test-sqlite.db'),
@@ -122,14 +123,8 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'mce_django_app.User'
 
-#LOGIN_URL = 'admin:login'
-#LOGIN_URL = '/accounts/login/'
-#LOGIN_REDIRECT_URL = '/'
-
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    #"allauth.account.auth_backends.AuthenticationBackend",
-    #'guardian.backends.ObjectPermissionBackend',
 )
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -138,9 +133,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        # 'OPTIONS': {
-        #     'min_length': 9,
-        # }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -172,6 +164,10 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+STATICFILES_DIRS = [
+    ('mce-app', os.path.join(BASE_DIR, 'project_static'))
+]
+
 MEDIA_ROOT = tempfile.gettempdir()
 
 SITE_ID = env('MCE_SITE_ID', default=1, cast=int)
@@ -196,9 +192,6 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'debug'
         },
-        #'db_log': {
-        #    'class': 'mce_django_app.db_log_handler.DatabaseLogHandler'
-        #},
     },
     'loggers': {
         '': {
@@ -215,10 +208,13 @@ LOGGING = {
 
 TEST_RUNNER = 'project_test.runner.PytestTestRunner'
 
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
 DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE = 10
 DJANGO_DB_LOGGER_ENABLE_FORMATTER = False
-
-#CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
@@ -256,7 +252,6 @@ DJOSER = {
     "PASSWORD_RESET_CONFIRM_URL": "#/password/reset/confirm/{uid}/{token}",
     "USERNAME_RESET_CONFIRM_URL": "#/username/reset/confirm/{uid}/{token}",
     "ACTIVATION_URL": "#/activate/{uid}/{token}",
-    #"SOCIAL_AUTH_ALLOWED_REDIRECT_URIS": ["http://test.localhost/"],
     'SERIALIZERS': {
         # TODO: 'user': 'mce_django_app.api.account.serializers.CustomUserSerializer',
     }
@@ -267,24 +262,8 @@ TAGGIT_CASE_INSENSITIVE = True
 
 MCE_CHANGES_ENABLE = False
 
-# SOCIALACCOUNT_PROVIDERS = {
-#     'google': {
-#         'EDX_URL': "https://draft.navoica.pl",
-#     }
-# }
-
-#ORGS_SLUGFIELD = 'django_extensions.db.fields.AutoSlugField'
-
-#DDF_DEBUG_MODE = True
-
-# DEBUG_TOOLBAR_CONFIG = {
-#     "ENABLE_STACKTRACES": True,
-#     "ENABLE_STACKTRACES_LOCALS": True
-# }
-
 SWAGGER_SETTINGS = {
     'LOGIN_URL': reverse_lazy('admin:login'),
-    #'LOGOUT_URL': '/admin/logout',
     'PERSIST_AUTH': True,
     'REFETCH_SCHEMA_WITH_AUTH': True,
     'REFETCH_SCHEMA_ON_LOGOUT': True,
@@ -297,29 +276,13 @@ SWAGGER_SETTINGS = {
             'name': 'Authorization',
             'type': 'apiKey',
         },
-        #'OAuth2 password': {
-        #    'flow': 'password',
-        #    'scopes': {
-        #        'read': 'Read everything.',
-        #        'write': 'Write everything,',
-        #    },
-        #    'tokenUrl': OAUTH2_TOKEN_URL,
-        #    'type': 'oauth2',
-        #},
         'Query': {
             'in': 'query',
             'name': 'auth',
             'type': 'apiKey',
         },
     },
-    #'OAUTH2_REDIRECT_URL': OAUTH2_REDIRECT_URL,
-    #'OAUTH2_CONFIG': {
-    #    'clientId': OAUTH2_CLIENT_ID,
-    #    'clientSecret': OAUTH2_CLIENT_SECRET,
-    #    'appName': OAUTH2_APP_NAME,
-    #},
     "DEFAULT_PAGINATOR_INSPECTORS": [
-        #'testproj.inspectors.UnknownPaginatorInspector',
         'drf_yasg.inspectors.DjangoRestResponsePagination',
         'drf_yasg.inspectors.CoreAPICompatInspector',
     ]
@@ -328,3 +291,8 @@ SWAGGER_SETTINGS = {
 REDOC_SETTINGS = {
     'SPEC_URL': ('schema-json', {'format': '.json'}),
 }
+
+ADMIN_TOOLS_INDEX_DASHBOARD = 'project_test.dashboard.CustomIndexDashboard'
+ADMIN_TOOLS_APP_INDEX_DASHBOARD = 'project_test.dashboard.CustomAppIndexDashboard'
+ADMIN_TOOLS_MENU = 'project_test.menu.CustomMenu'
+

@@ -20,6 +20,10 @@ install_requires = [
     'django-taggit',
     'django-mptt',
     'django-formtools',
+    'django-admin-tools@git+https://github.com/yakky/django-admin-tools.git@feature/django-30#egg=django-admin-tools',
+
+    'django-redis',
+    #'gevent',
 
     'django-dynamic-fixture>=3.1.0', # for mce_django_app.pytest.plugin
     'pytest>=5.4.1',                 # for mce_django_app.pytest.plugin

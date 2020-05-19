@@ -7,13 +7,13 @@ from django.contrib.staticfiles.views import serve
 from django.urls import re_path
 from django.conf import settings
 
-def _serve(request, path, insecure=False, **kwargs):
+def _serve(request, path, **kwargs):
     return serve(request, path, insecure=True, show_indexes=True, **kwargs)
 
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='admin:index', permanent=True)),
     path('adminmce/', admin.site.urls),
-    #path('accounts/', include('allauth.urls')),
+    path('admin_tools/', include('admin_tools.urls')),
     path('i18n/', include('django.conf.urls.i18n')),
     path('select2/', include('django_select2.urls')),
     re_path(r'^%s(?P<path>.*)$' % re.escape(settings.STATIC_URL.lstrip('/')), _serve),
