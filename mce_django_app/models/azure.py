@@ -103,7 +103,7 @@ class ResourceAzure(Resource):
     #     "name": "Standard_LRS",
     #     "tier": "Standard"
     # }
-    sku = JSONField(default={}, null=True, blank=True)
+    sku = JSONField(default=dict, null=True, blank=True)
 
     # TODO: utiliser un champs CharField pour faire plus simple ?
     resource_group = models.ForeignKey(
@@ -119,7 +119,7 @@ class ResourceAzure(Resource):
     #     "promotionCode": "",
     #     "product": "OMSGallery/ContainerInsights"
     # }
-    plan = JSONField(default={}, null=True, blank=True)
+    plan = JSONField(default=dict, null=True, blank=True)
 
     # TODO: Attention, basé sur resource_id
     # TODO: utiliser un champs CharField pour faire plus simple ?

@@ -284,7 +284,7 @@ class Resource(BaseModel):
     # TODO: limit choices same provider
     tags = models.ManyToManyField(Tag)
 
-    metas = JSONField(default={}, null=True, blank=True)
+    metas = JSONField(default=dict, null=True, blank=True)
 
     #changes = GenericRelation('ResourceEventChange', related_query_name='resource')
 
@@ -338,11 +338,11 @@ class ResourceEventChange(BaseModel):
 
     action = models.CharField(max_length=10, choices=constants.EventChangeType.choices)
 
-    changes = JSONField(default=[], null=True, blank=True)
+    changes = JSONField(default=list, null=True, blank=True)
 
-    old_object = JSONField(default={}, null=True, blank=True)
+    old_object = JSONField(default=dict, null=True, blank=True)
 
-    new_object = JSONField(default={}, null=True, blank=True)
+    new_object = JSONField(default=dict, null=True, blank=True)
 
     diff = models.TextField(null=True, blank=True)
 

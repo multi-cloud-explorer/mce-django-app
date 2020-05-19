@@ -34,6 +34,7 @@ def resources(api_client, admin_user, mce_app_company, mce_app_company2, mce_app
         company=mce_app_company.pk,
         resource_type=mce_app_resource_type.pk,
         provider=mce_app_resource_type.provider.pk,
+        metas={"key1": "value1"}
     ))
     assert response.status_code == 201
     resource1_id = response.json()['id']
@@ -44,6 +45,7 @@ def resources(api_client, admin_user, mce_app_company, mce_app_company2, mce_app
         company=mce_app_company2.pk,
         resource_type=mce_app_resource_type.pk,
         provider=mce_app_resource_type.provider.pk,
+        metas={"key1": "value1"}
     ))
     assert response.status_code == 201
     resource2_id = response.json()['id']
@@ -96,7 +98,7 @@ def test_crud_without_permissions(admin_user, api_client, mce_app_company, mce_a
 
     # --- Retrieve list
     response = api_client.get(url)
-    pp(response.json())
+    # pp(response.json())
     assert response.status_code == 200
 
     # assert response.json() == {

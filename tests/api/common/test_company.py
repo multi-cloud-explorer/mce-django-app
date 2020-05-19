@@ -22,7 +22,7 @@ def test_crud_without_permissions(admin_user, api_client):
     assert response.status_code == 201
 
     data = response.json()
-    print(data)
+    # print(data)
 
     del data['created']
     assert data == {

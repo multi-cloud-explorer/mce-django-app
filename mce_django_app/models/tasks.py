@@ -4,8 +4,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 
-from jsonfield import JSONField
-
 from mce_django_app import constants
 from mce_django_app import utils
 from mce_django_app.models.common import BaseModel

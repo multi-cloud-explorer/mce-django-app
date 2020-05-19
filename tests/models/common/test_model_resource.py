@@ -107,7 +107,7 @@ def test_resource_to_dict(
         )
     )
 
-    pprint(obj.to_dict())
+    # pprint(obj.to_dict())
     assert obj.to_dict()['metas'] == dict(key1=2, key2="deux", key3="trois")
     assert isinstance(obj.to_dict()['metas'], dict) is True
     assert type(obj.to_dict()['metas']) == dict

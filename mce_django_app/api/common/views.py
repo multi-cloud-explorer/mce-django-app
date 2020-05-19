@@ -132,7 +132,6 @@ class ResourceViewSet(WithCompanyFieldMixin, DestroyModelMixin, viewsets.ModelVi
     #     #return Response(serializer.data, status=status.HTTP_200_OK)
 
     def get_serializer_class(self):
-        print('!!! self.action : ', self.action)
         # create / patch=partial_update
         if self.action in ['list', 'retrieve']:
             return serializers.ResourceSerializer

@@ -102,20 +102,20 @@ class ResourceSerializer(serializers.ModelSerializer):
         read_only=True # TODO: ?
     )
 
+    metas = serializers.JSONField(read_only=True)
+
     class Meta:
         model = models.Resource
         fields = '__all__'
 
 class ResourceSerializerDetail(serializers.ModelSerializer):
 
-    metas = serializers.JSONField(required=False)
+    metas = serializers.DictField(child=serializers.CharField(), allow_empty=False, required=True)
 
     #tags = TagSerializer(many=True)
 
     class Meta:
         model = models.Resource
-        #fields = '__all__'
-        #read_only_fields = ["tags"]
         fields = [
             'id',
             'name',

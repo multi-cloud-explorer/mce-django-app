@@ -21,7 +21,7 @@ jobs:
     #  env: DJANGO_VERSION=3.0.5 TEST_DB_ENGINE=mysql DATABASE_URL=mysql://travis:travis@localhost/mcetest CACHE_URL=redis://127.0.0.1:6379/0
   
 before_install:
-  - pip install -U pip
+  - pip install -U pip wheel
 
   - if [[ "$TEST_DB_ENGINE" == "psql" ]]; then
        docker run -d -p 5432:5432 -e POSTGRES_DB=travis -e POSTGRES_USER=travis -e POSTGRES_PASSWORD=travis -e POSTGRES_DB=mcetest postgres:12-alpine;

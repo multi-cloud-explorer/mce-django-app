@@ -1,9 +1,7 @@
 from itertools import chain
 import logging
 
-#from django.utils.text import slugify
 from slugify import slugify
-from jsonfield import JSONField
 
 logger = logging.getLogger(__name__)
 

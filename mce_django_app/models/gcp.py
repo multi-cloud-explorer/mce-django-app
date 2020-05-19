@@ -58,7 +58,7 @@ class ProjectGCP(BaseModel):
         on_delete=models.PROTECT,
     )
 
-    credentials = JSONField(default={}, null=True, blank=True)
+    credentials = JSONField(default=dict, null=True, blank=True)
 
     def get_auth(self):
         """Auth format for `mce_lib_gcp.???`"""
