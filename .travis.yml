@@ -33,7 +33,7 @@ install:
   - pip freeze
 
 script:
-  - pytest -m 'not mce_known_bug'
+  - pytest -m 'not mce_known_bug and not mce_todo'
   #- bandit -r --ini .bandit mce_django_app -vv
 
 after_success:
